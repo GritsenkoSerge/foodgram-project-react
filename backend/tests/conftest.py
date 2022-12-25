@@ -4,7 +4,7 @@ from django.utils.version import get_version
 
 from foodgram.settings import INSTALLED_APPS
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 root_dir_content = list(Path(BASE_DIR).iterdir())
 PROJECT_DIR_NAME = 'backend'
 MANAGE_PATH = Path(BASE_DIR, PROJECT_DIR_NAME)
