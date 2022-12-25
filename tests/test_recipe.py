@@ -1,4 +1,4 @@
-from django.db.models import fields
+from django.db import models
 
 from tests.utils import check_model_field_names
 
@@ -12,22 +12,15 @@ except ImportError:
     assert False, 'Не найдена модель `Recipe` в приложении `recipes`'
 
 
-def search_field(fields, attname):
-    for field in fields:
-        if attname == field.attname:
-            return field
-    return None
-
-
 class TestRecipe:
     MODEL = Recipe
-    FIELDS = {
-        'author': (fields.ForeignKey, User),
-        'name': (fields.CharField, None),
-        'image': (fields.ImageField, None),
-        'text': (fields.CharField, None),
-        'cooking_time': (fields.PositiveIntegerField, None),
+    MODEL_FIELDS = {
+        'author': (models.ForeignKey, User),
+        'name': (models.CharField, None),
+        'image': (models.ImageField, None),
+        'text': (models.CharField, None),
+        'cooking_time': (models.PositiveIntegerField, None),
     }
 
     def test_recipe_model(self):
-        check_model_field_names(self.MODEL, self.FIELDS)
+        check_model_field_names(self.MODEL, self.MODEL_FIELDS)
