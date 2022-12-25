@@ -1,4 +1,4 @@
-from django.db.models import fields
+from django.db import models
 
 from tests.utils import check_model_field_names
 
@@ -12,19 +12,12 @@ except ImportError:
     assert False, 'Не найдена модель `Subscription` в приложении `users`'
 
 
-def search_field(fields, attname):
-    for field in fields:
-        if attname == field.attname:
-            return field
-    return None
-
-
 class TestSubscription:
     MODEL = Subscription
-    FIELDS = {
-        'user': (fields.ForeignKey, User),
-        'author': (fields.ForeignKey, User),
+    MODEL_FIELDS = {
+        'user': (models.ForeignKey, User),
+        'author': (models.ForeignKey, User),
     }
 
     def test_subscription_model(self):
-        check_model_field_names(self.MODEL, self.FIELDS)
+        check_model_field_names(self.MODEL, self.MODEL_FIELDS)

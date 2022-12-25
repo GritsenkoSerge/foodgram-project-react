@@ -1,4 +1,4 @@
-from django.db.models import fields
+from django.db import models
 
 from tests.utils import check_model_field_names
 
@@ -8,20 +8,13 @@ except ImportError:
     assert False, 'Не найдена модель `Tag` в приложении `tags`'
 
 
-def search_field(fields, attname):
-    for field in fields:
-        if attname == field.attname:
-            return field
-    return None
-
-
 class TestTag:
     MODEL = Tag
-    FIELDS = {
-        'name': (fields.CharField, None),
-        'color': (fields.CharField, None),
-        'slug': (fields.CharField, None),
+    MODEL_FIELDS = {
+        'name': (models.CharField, None),
+        'color': (models.CharField, None),
+        'slug': (models.SlugField, None),
     }
 
     def test_tag_model(self):
-        check_model_field_names(self.MODEL, self.FIELDS)
+        check_model_field_names(self.MODEL, self.MODEL_FIELDS)

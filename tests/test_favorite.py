@@ -1,4 +1,4 @@
-from django.db.models import fields
+from django.db import models
 
 from tests.utils import check_model_field_names
 
@@ -16,19 +16,12 @@ except ImportError:
     assert False, 'Не найдена модель `Favorite` в приложении `recipes`'
 
 
-def search_field(fields, attname):
-    for field in fields:
-        if attname == field.attname:
-            return field
-    return None
-
-
 class TestFavorite:
     MODEL = Favorite
-    FIELDS = {
-        'recipe': (fields.ForeignKey, Recipe),
-        'user': (fields.ForeignKey, User),
+    MODEL_FIELDS = {
+        'recipe': (models.ForeignKey, Recipe),
+        'user': (models.ForeignKey, User),
     }
 
     def test_favorite_model(self):
-        check_model_field_names(self.MODEL, self.FIELDS)
+        check_model_field_names(self.MODEL, self.MODEL_FIELDS)

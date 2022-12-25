@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import fields
+from django.db import models
 
 from .utils import check_model_field_names
 
@@ -9,20 +9,13 @@ except ImportError:
     assert False, 'Не найдена модель `User` в приложении `users`'
 
 
-def search_field(fields, attname):
-    for field in fields:
-        if attname == field.attname:
-            return field
-    return None
-
-
 class TestUser:
     MODEL = User
-    FIELDS = {
-        'email': (fields.CharField, None),
-        'username': (fields.CharField, None),
-        'first_name': (fields.CharField, None),
-        'last_name': (fields.CharField, None),
+    MODEL_FIELDS = {
+        'email': (models.EmailField, None),
+        'username': (models.CharField, None),
+        'first_name': (models.CharField, None),
+        'last_name': (models.CharField, None),
     }
 
     def test_user_model(self):
@@ -30,4 +23,4 @@ class TestUser:
             'Модели `User` должна возвращаться get_user_model()'
         )
 
-        check_model_field_names(self.MODEL, self.FIELDS)
+        check_model_field_names(self.MODEL, self.MODEL_FIELDS)
