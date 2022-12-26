@@ -18,7 +18,7 @@ class TestRecipe:
         "author": (models.ForeignKey, User),
         "name": (models.CharField, None),
         "image": (models.ImageField, None),
-        "text": (models.CharField, None),
+        "text": (models.TextField, None),
         "cooking_time": (models.PositiveIntegerField, None),
     }
 
