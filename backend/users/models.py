@@ -44,33 +44,32 @@ class User(AbstractUser):
         verbose_name_plural = "Пользователи"
 
 
-class UserRelated(models.Model):
+class Subscription(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name="Пользователь",
-        help_text="Выберите пользователя",
-        related_name="+",
+        related_name="subscriber",
+        verbose_name="Подписчик",
+        help_text="Выберите из списка подписчика",
     )
-
-    class Meta:
-        abstract = True
-
-
-class AuthorRelated(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        related_name="subscribed",
         verbose_name="Автор",
-        help_text="Выберите автора",
-        related_name="+",
+        help_text="Выберите из списка автора",
     )
 
     class Meta:
-        abstract = True
-
-
-class Subscription(AuthorRelated, UserRelated):
-    class Meta(AuthorRelated.Meta, UserRelated.Meta):
         verbose_name = "Подписка"
         verbose_name_plural = "Подписки"
+        constraints = [
+            models.UniqueConstraint(
+                name="unique_subscription",
+                fields=["user", "author"],
+            ),
+            models.CheckConstraint(
+                name="prevent_self_subscription",
+                check=~models.Q(user=models.F("author")),
+            ),
+        ]
