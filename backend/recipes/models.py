@@ -52,13 +52,25 @@ class Recipe(models.Model):
         "Время приготовления в минутах",
         help_text="Введите время приготовления в минутах",
     )
-    ingredients = models.ManyToManyField(RecipeIngredient, verbose_name="Ингредиенты")
-    tags = models.ManyToManyField(Tag, verbose_name="Теги")
+    ingredients = models.ManyToManyField(
+        RecipeIngredient,
+        verbose_name="Ингредиенты",
+        help_text="Выберите количество ингредиентов",
+    )
+    tags = models.ManyToManyField(Tag, verbose_name="Теги", help_text="Выберите теги")
     favorites = models.ManyToManyField(
-        User, verbose_name="Избранное", related_name="favorite_recipes", blank=True
+        User,
+        verbose_name="Избранное",
+        related_name="favorite_recipes",
+        blank=True,
+        help_text="Выберите пользователей, для добавления в избранное",
     )
     carts = models.ManyToManyField(
-        User, verbose_name="Корзины", related_name="cart_recipes", blank=True
+        User,
+        verbose_name="Корзины",
+        related_name="cart_recipes",
+        blank=True,
+        help_text="Выберите пользователей, для добавления в их корзины",
     )
 
     @admin.display(description="Число добавлений в избранное")
