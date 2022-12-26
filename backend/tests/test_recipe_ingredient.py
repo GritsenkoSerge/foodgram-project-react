@@ -19,7 +19,6 @@ except ImportError:
 class TestRecipeIngredient:
     MODEL = RecipeIngredient
     MODEL_FIELDS = {
-        "recipe": (models.ForeignKey, Recipe),
         "ingredient": (models.ForeignKey, Ingredient),
         "amount": (models.PositiveIntegerField, None),
     }
