@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -63,7 +64,7 @@ DATABASES = {
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": (
-            "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+            "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
         )
     },
     {
@@ -85,8 +86,46 @@ USE_I18N = True
 
 USE_TZ = True
 
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 100,
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+
+EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
+
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "static"
+
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "users.User"
+
+ADMIN_MODEL_EMPTY_VALUE = "-пусто-"
+
+USERNAME_MAX_LENGTH = 150
+EMAIL_MAX_LENGTH = 254
+FIRST_NAME_MAX_LENGTH = 150
+LAST_NAME_MAX_LENGTH = 150
+NAME_MAX_LENGTH = 200
+MEASUREMENT_UNIT_MAX_LENGTH = 200
+SLUG_MAX_LENGTH = 200
+COLOR_MAX_LENGTH = 7
+
+CONFIRMATION_CODE_MAX_LENGTH = 24
