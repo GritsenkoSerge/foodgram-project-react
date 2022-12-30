@@ -16,11 +16,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "api",
-    "users",
+    "django_filters",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "djoser",
     "tags",
     "ingredients",
+    "users",
     "recipes",
+    "api",
 ]
 
 MIDDLEWARE = [
@@ -95,6 +99,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 100,
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+}
+
+DJOSER = {
+    "LOGOUT_ON_PASSWORD_CHANGE": True,
+    "SERIALIZERS": {
+        "user": "users.serializers.UserSerializer",
+    },
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
