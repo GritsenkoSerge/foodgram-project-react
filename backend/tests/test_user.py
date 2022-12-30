@@ -33,82 +33,77 @@ class TestUser:
         check_model_field_names(self.MODEL, self.MODEL_FIELDS)
 
     @pytest.mark.django_db(transaction=True)
-    def test_user_get(self, user_client):
+    def test_user_get(self, user_client, user):
+        url = self.URL_LOGIN
+        password = ("1234567",)
+        data = {"email": user.email, "password": password}
+        response = user_client.post(url, data=data)
+        token_field = "auth_token"
+        token = response.json().get(token_field)
+        headers = {
+            "HTTP_AUTHORIZATION": f"Token {token}",
+        }
         url = self.URL_USERS
-        response = user_client.get(url)
+        response = user_client.get(url, **headers)
         code_expected = status.HTTP_200_OK
         assert (
             response.status_code == code_expected
         ), f"Убедитесь, что при запросе `{url}` возвращается код {code_expected}."
 
-    # post /api/users/ 201 400
     @pytest.mark.django_db(transaction=True)
     def test_user_post(self, user_client, user):
-        url = self.URL_LOGIN
-        data = {"email": user.email, "password": user.password}
-        response = user_client.post(url, data=data)
-        token_field = "auth_token"
-        token = response.json().get(token_field)
-        headers = {
-            "Authorization": f"Token {token}",
-        }
+        password = "1234qwre!@#$QWER"
         url = self.URL_USERS
-        changed_first_name = "changed_first_name"
         data = {
-            "email": user.email,
-            "password": user.password,
-            "first_name": changed_first_name,
-            "username": user.username,
+            "email": "new" + user.email,
+            "password": password,
+            "first_name": user.first_name,
+            "username": "new" + user.username,
             "last_name": user.last_name,
         }
-        response = user_client.post(url, headers=headers)
+        response = user_client.post(url)
         code_expected = status.HTTP_400_BAD_REQUEST
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с некорректными параметрами "
             f"возвращается код {code_expected}."
         )
         response = user_client.post(url, data=data)
-        code_expected = status.HTTP_401_UNAUTHORIZED
-        assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` без аутентификации "
-            f"возвращается код {code_expected}."
-        )
-        response = user_client.post(url, data=data, headers=headers)
         code_expected = status.HTTP_201_CREATED
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
             f"и корректными данными возвращается код {code_expected}."
         )
-        assert response.json().get("first_name") == changed_first_name, (
+        assert response.json().get("email") == "new" + user.email, (
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
-            f"и корректными данными возвращаются изменненные поля."
+            f"и корректными данными возвращается зарегистрированный пользователь."
         )
 
     @pytest.mark.django_db(transaction=True)
     def test_user_id_get(self, user_client, user):
         url = self.URL_LOGIN
-        data = {"email": user.email, "password": user.password}
+        password = ("1234567",)
+        data = {"email": user.email, "password": password}
         response = user_client.post(url, data=data)
         token_field = "auth_token"
         token = response.json().get(token_field)
         headers = {
-            "Authorization": f"Token {token}",
+            "HTTP_AUTHORIZATION": f"Token {token}",
         }
-        url = f"{self.URL_USERS}/0/"
+        url = f"{self.URL_USERS}0/"
         response = user_client.get(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` без аутентификации "
             f"возвращается код {code_expected}."
         )
-        response = user_client.get(url, headers=headers)
+        response = user_client.get(url, **headers)
         code_expected = status.HTTP_404_NOT_FOUND
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` не существующего id "
             f"возвращается код {code_expected}."
         )
-        url = f"{self.URL_USERS}/{user.id}/"
-        response = user_client.get(url, headers=headers)
+        url = f"{self.URL_USERS}{user.id}/"
+        response = user_client.get(url, **headers)
         code_expected = status.HTTP_200_OK
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
@@ -119,16 +114,16 @@ class TestUser:
             f"и корректными данными возвращаются изменненные поля."
         )
 
-    # get /api/users/me/ 200 401
     @pytest.mark.django_db(transaction=True)
     def test_user_me_get(self, user_client, user):
         url = self.URL_LOGIN
-        data = {"email": user.email, "password": user.password}
+        password = ("1234567",)
+        data = {"email": user.email, "password": password}
         response = user_client.post(url, data=data)
         token_field = "auth_token"
         token = response.json().get(token_field)
         headers = {
-            "Authorization": f"Token {token}",
+            "HTTP_AUTHORIZATION": f"Token {token}",
         }
         url = self.URL_USERS_ME
         response = user_client.get(url)
@@ -137,7 +132,7 @@ class TestUser:
             f"Убедитесь, что при запросе `{url}` без аутентификации "
             f"возвращается код {code_expected}."
         )
-        response = user_client.get(url, headers=headers)
+        response = user_client.get(url, **headers)
         code_expected = status.HTTP_200_OK
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
@@ -148,16 +143,16 @@ class TestUser:
             f"возвращает данные пользователя."
         )
 
-    # post /api/users/set_password/ 204 400 401
     @pytest.mark.django_db(transaction=True)
     def test_user_set_password(self, user_client, user):
         url = self.URL_LOGIN
-        data = {"email": user.email, "password": user.password}
+        password = ("1234567",)
+        data = {"email": user.email, "password": password}
         response = user_client.post(url, data=data)
         token_field = "auth_token"
         token = response.json().get(token_field)
         headers = {
-            "Authorization": f"Token {token}",
+            "HTTP_AUTHORIZATION": f"Token {token}",
         }
         url = self.URL_USERS_SET_PASSWORD
         response = user_client.post(url)
@@ -167,8 +162,8 @@ class TestUser:
             f"возвращается код {code_expected}."
         )
         data = {}
-        response = user_client.post(url, data=data, headers=headers)
-        code_expected = status.HTTP_401_UNAUTHORIZED
+        response = user_client.post(url, data=data, **headers)
+        code_expected = status.HTTP_400_BAD_REQUEST
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
             f"и невалидными данными возвращается код {code_expected}."
@@ -183,8 +178,8 @@ class TestUser:
                 f"Убедитесь, что при запросе `{url}` с невалидными данными "
                 f"возвращается ошибка с указанием поля {field}."
             )
-        data = {"new_password": user.password[::-1], "current_password": user.password}
-        response = user_client.post(url, data=data, headers=headers)
+        data = {"new_password": "1234qwer!@#$QWER", "current_password": password}
+        response = user_client.post(url, data=data, **headers)
         code_expected = status.HTTP_204_NO_CONTENT
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с валидными данными "

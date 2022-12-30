@@ -27,7 +27,7 @@ if MANAGE_FILE not in project_dir_content:
         f"Убедитесь, что у вас верная структура проекта."
     )
 
-assert get_version() > "4.0.0", "Используйте версию Django > 4.0.0"
+assert get_version() < "4.0.0", "Используйте версию Django < 4.0.0"
 
 APPS = ["api", "users", "tags", "ingredients", "recipes"]
 assert all(app in INSTALLED_APPS for app in APPS), (
