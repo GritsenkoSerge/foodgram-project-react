@@ -1,3 +1,4 @@
+import pytest
 from django.db import models
 
 from tests.utils import check_model_field_names
@@ -18,6 +19,23 @@ class TestSubscription:
         "user": (models.ForeignKey, User),
         "author": (models.ForeignKey, User),
     }
+    URL_USERS = "/api/users/"
+    URL_SUBSCRIPTIONS = "/api/users/subscriptions/"
 
     def test_subscription_model(self):
         check_model_field_names(self.MODEL, self.MODEL_FIELDS)
+
+    # get /api/users/subscriptions/ 200 401
+    @pytest.mark.django_db(transaction=True)
+    def test_subscription_get(self, client, user):
+        ...
+
+    # post /api/users/{id}/subscribe/ 201 400 401 404
+    @pytest.mark.django_db(transaction=True)
+    def test_subscription_post(self, client, user, another_user):
+        ...
+
+    # delete /api/users/{id}/subscribe/ 204 400 401 404
+    @pytest.mark.django_db(transaction=True)
+    def test_subscription_delete(self, client, user, another_user):
+        ...
