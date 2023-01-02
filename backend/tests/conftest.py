@@ -60,6 +60,28 @@ def user(django_user_model, user_password):
 
 
 @pytest.fixture
+def another_user(django_user_model, user_password):
+    return django_user_model.objects.create_user(
+        username="TestUser2",
+        password=user_password,
+        first_name="FirstName",
+        last_name="LastName",
+        email="e2@mail.ru",
+    )
+
+
+@pytest.fixture
+def one_more_user(django_user_model, user_password):
+    return django_user_model.objects.create_user(
+        username="TestUser3",
+        password=user_password,
+        first_name="FirstName",
+        last_name="LastName",
+        email="e3@mail.ru",
+    )
+
+
+@pytest.fixture
 def api_client(user, user_password, url_login):
     client = APIClient()
     data = {"email": user.email, "password": user_password}
@@ -78,12 +100,5 @@ def mixer():
 
 
 @pytest.fixture
-def another_user(mixer):
-    from django.contrib.auth.models import User
-
-    return mixer.blend(User, username="AnotherUser")
-
-
-@pytest.fixture
-def subscription(mixer):
+def subscription(mixer, user, another_user):
     return mixer.blend(Subscription, user=user, author=another_user)

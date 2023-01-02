@@ -63,8 +63,7 @@ class TestAuth:
     @pytest.mark.django_db(transaction=True)
     def test_auth_logout__auth_was_not_provided(self, client):
         url = self.url_logout
-        headers = {"HTTP_WWW_AUTHENTICATE": "Token"}
-        response = client.post(url, **headers)
+        response = client.post(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` без имеющейся аутентификации, "
@@ -72,18 +71,10 @@ class TestAuth:
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_auth_logout__auth_was_provided(self, client, user, user_password):
-        url = self.url_login
-        valid_data = {"email": user.email, "password": user_password}
-        response = client.post(url, data=valid_data)
-        field_in_response = "auth_token"
-        token = response.json().get(field_in_response)
+    def test_auth_logout__auth_was_provided(self, api_client):
         url = self.url_logout
         code_expected = status.HTTP_201_CREATED
-        headers = {
-            "HTTP_AUTHORIZATION": f"Token {token}",
-        }
-        response = client.post(url, **headers)
+        response = api_client.post(url)
         code_expected = status.HTTP_204_NO_CONTENT
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацией, "
