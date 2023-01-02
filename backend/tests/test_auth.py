@@ -11,9 +11,9 @@ class TestAuth:
     url_users_me = "/api/users/me/"
 
     @pytest.mark.django_db(transaction=True)
-    def test_auth_login__invalid_request_data(self, user_client):
+    def test_auth_login__invalid_request_data(self, client):
         url = self.url_login
-        response = user_client.post(url)
+        response = client.post(url)
         code_expected = status.HTTP_400_BAD_REQUEST
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` без параметров, "
@@ -26,7 +26,7 @@ class TestAuth:
             "password": password_invalid,
             "email": email_invalid,
         }
-        response = user_client.post(url, data=data_invalid)
+        response = client.post(url, data=data_invalid)
         code_expected = status.HTTP_400_BAD_REQUEST
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с некорректными параметрами, "
@@ -34,11 +34,10 @@ class TestAuth:
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_auth_login__valid_request_data(self, user_client, user):
+    def test_auth_login__valid_request_data(self, client, user, user_password):
         url = self.url_login
-        password = ("1234567",)
-        valid_data = {"email": user.email, "password": password}
-        response = user_client.post(url, data=valid_data)
+        valid_data = {"email": user.email, "password": user_password}
+        response = client.post(url, data=valid_data)
         code_expected = status.HTTP_201_CREATED
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с валидными данными, "
@@ -55,17 +54,16 @@ class TestAuth:
         headers = {
             "HTTP_AUTHORIZATION": f"Token {token}",
         }
-        response = user_client.get(url, **headers)
+        response = client.get(url, **headers)
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей, "
             f"возвращается код {code_expected}."
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_auth_logout__auth_was_not_provided(self, user_client):
+    def test_auth_logout__auth_was_not_provided(self, client):
         url = self.url_logout
-        headers = {"HTTP_WWW_AUTHENTICATE": "Token"}
-        response = user_client.post(url, **headers)
+        response = client.post(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` без имеющейся аутентификации, "
@@ -73,19 +71,10 @@ class TestAuth:
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_auth_logout__auth_was_provided(self, user_client, user):
-        url = self.url_login
-        password = ("1234567",)
-        valid_data = {"email": user.email, "password": password}
-        response = user_client.post(url, data=valid_data)
-        field_in_response = "auth_token"
-        token = response.json().get(field_in_response)
+    def test_auth_logout__auth_was_provided(self, api_client):
         url = self.url_logout
         code_expected = status.HTTP_201_CREATED
-        headers = {
-            "HTTP_AUTHORIZATION": f"Token {token}",
-        }
-        response = user_client.post(url, **headers)
+        response = api_client.post(url)
         code_expected = status.HTTP_204_NO_CONTENT
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацией, "

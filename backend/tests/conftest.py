@@ -1,9 +1,12 @@
 from pathlib import Path
-import pytest
 
+import pytest
 from django.utils.version import get_version
+from mixer.backend.django import mixer as _mixer
+from rest_framework.test import APIClient
 
 from foodgram.settings import INSTALLED_APPS
+from users.models import Subscription
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 root_dir_content = list(Path(BASE_DIR).iterdir())
@@ -36,10 +39,20 @@ assert all(app in INSTALLED_APPS for app in APPS), (
 
 
 @pytest.fixture
-def user(django_user_model):
+def url_login():
+    return "/api/auth/token/login/"
+
+
+@pytest.fixture
+def user_password():
+    return "123qwe!@#QWE"
+
+
+@pytest.fixture
+def user(django_user_model, user_password):
     return django_user_model.objects.create_user(
         username="TestUser",
-        password="1234567",
+        password=user_password,
         first_name="FirstName",
         last_name="LastName",
         email="e@mail.ru",
@@ -47,13 +60,45 @@ def user(django_user_model):
 
 
 @pytest.fixture
-def user_client(user, client):
-    client.force_login(user)
+def another_user(django_user_model, user_password):
+    return django_user_model.objects.create_user(
+        username="TestUser2",
+        password=user_password,
+        first_name="FirstName",
+        last_name="LastName",
+        email="e2@mail.ru",
+    )
+
+
+@pytest.fixture
+def one_more_user(django_user_model, user_password):
+    return django_user_model.objects.create_user(
+        username="TestUser3",
+        password=user_password,
+        first_name="FirstName",
+        last_name="LastName",
+        email="e3@mail.ru",
+    )
+
+
+@pytest.fixture
+def api_client(user, user_password, url_login):
+    client = APIClient()
+    data = {"email": user.email, "password": user_password}
+    response = client.post(url_login, data=data)
+    token = response.json().get("auth_token")
+    headers = {
+        "HTTP_AUTHORIZATION": f"Token {token}",
+    }
+    client.credentials(**headers)
     return client
 
 
 @pytest.fixture
-def another_user(mixer):
-    from django.contrib.auth.models import User
+def mixer():
+    return _mixer
 
-    return mixer.blend(User, username="AnotherUser")
+
+@pytest.fixture
+def subscription(mixer, user, another_user):
+    return mixer.blend(Subscription, user=user, author=another_user)
