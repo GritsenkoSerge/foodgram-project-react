@@ -1,6 +1,7 @@
 from djoser import serializers as djoser_serializers
 from rest_framework import serializers as serializers
 
+from ingredients.models import Ingredient
 from tags.models import Tag
 from users.models import Subscription, User
 
@@ -61,4 +62,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
+        fields = "__all__"
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ingredient
         fields = "__all__"

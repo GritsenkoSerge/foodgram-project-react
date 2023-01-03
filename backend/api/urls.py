@@ -2,7 +2,12 @@ from django.urls import include, path
 from djoser.views import UserViewSet, TokenDestroyView
 from rest_framework import routers
 
-from .views import TagViewSet, TokenCreateView, UserWithRecipesViewSet
+from .views import (
+    IngredientViewSet,
+    TagViewSet,
+    TokenCreateView,
+    UserWithRecipesViewSet,
+)
 
 app_name = "api"
 
@@ -34,6 +39,7 @@ users_patterns = [
 
 router = routers.DefaultRouter()
 router.register(r"tags", TagViewSet, basename="tags")
+router.register(r"ingredients", IngredientViewSet, basename="ingredients")
 
 urlpatterns = [
     path(r"", include(router.urls)),
