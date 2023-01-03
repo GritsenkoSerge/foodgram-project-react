@@ -39,13 +39,17 @@ class TestSubscription:
 
     # get /api/users/subscriptions/ 200
     @pytest.mark.django_db(transaction=True)
-    def test_subscription__authorized_get(self, api_client):
+    def test_subscription__authorized_get(self, api_client, subscription):
         url = self.URL_USERS_SUBSCRIPTIONS
         response = api_client.get(url)
         code_expected = status.HTTP_200_OK
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей, "
             f"возвращается код {code_expected}."
+        )
+        json = response.json()
+        assert json.get("count") == 1, (
+            f"Убедитесь, что при запросе `{url}` " "возвращается код одна подписка."
         )
 
     # post /api/users/{id}/subscribe/ 401
@@ -72,6 +76,10 @@ class TestSubscription:
             f"на подписку на самого себя, "
             f"возвращается код {code_expected}."
         )
+        json = response.json()
+        assert json.get(
+            "errors"
+        ), f"Убедитесь, что при запросе `{url}` возвращается текст ошибки."
         url = self.URL_USERS_SUBSCRIBE.format(subscription.author.id)
         response = api_client.post(url)
         code_expected = status.HTTP_400_BAD_REQUEST
@@ -80,6 +88,10 @@ class TestSubscription:
             f"на уже имеющуюся подписку, "
             f"возвращается код {code_expected}."
         )
+        json = response.json()
+        assert json.get(
+            "errors"
+        ), f"Убедитесь, что при запросе `{url}` возвращается текст ошибки."
 
     # post /api/users/{id}/subscribe/ 404
     @pytest.mark.django_db(transaction=True)
@@ -104,12 +116,71 @@ class TestSubscription:
             f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей "
             f"возвращается код {code_expected}."
         )
-        assert response.json().get("is_subscribed"), (
+        json = response.json()
+        assert json.get("is_subscribed"), (
             f"Убедитесь, что при запросе `{url}` возвращается данные пользователя, "
             "на которого подписались, с is_subscribed=true."
         )
 
-    # delete /api/users/{id}/subscribe/ 204 400 401 404
+    # delete /api/users/{id}/subscribe/ 204
     @pytest.mark.django_db(transaction=True)
-    def test_subscription_delete(self, client, user, another_user):
-        ...
+    def test_subscription__valid_delete(self, api_client, another_user, subscription):
+        url = self.URL_USERS_SUBSCRIBE.format(another_user.id)
+        response = api_client.delete(url)
+        code_expected = status.HTTP_204_NO_CONTENT
+        assert response.status_code == code_expected, (
+            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей "
+            f"возвращается код {code_expected}."
+        )
+        assert (
+            not response.content
+        ), f"Убедитесь, что при запросе `{url}` возвращается пустой content."
+
+    # delete /api/users/{id}/subscribe/ 400
+    @pytest.mark.django_db(transaction=True)
+    def test_subscription__invalid_delete(self, api_client, one_more_user):
+        url = self.URL_USERS_SUBSCRIBE.format(one_more_user.id)
+        response = api_client.delete(url)
+        code_expected = status.HTTP_400_BAD_REQUEST
+        assert response.status_code == code_expected, (
+            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей "
+            f"возвращается код {code_expected}."
+        )
+        json = response.json()
+        assert json.get(
+            "errors"
+        ), f"Убедитесь, что при запросе `{url}` возвращается текст ошибки."
+
+    # delete /api/users/{id}/subscribe/ 401
+    @pytest.mark.django_db(transaction=True)
+    def test_subscription__unauthorized_delete(
+        self, client, another_user, subscription
+    ):
+        url = self.URL_USERS_SUBSCRIBE.format(another_user.id)
+        response = client.delete(url)
+        code_expected = status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == code_expected, (
+            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей "
+            f"возвращается код {code_expected}."
+        )
+        json = response.json()
+        assert json.get(
+            "detail"
+        ), f"Убедитесь, что при запросе `{url}` возвращается текст ошибки."
+
+    # delete /api/users/{id}/subscribe/ 404
+    @pytest.mark.django_db(transaction=True)
+    def test_subscription__not_found_delete(self, api_client):
+        not_found_id = "404"
+        url = self.URL_USERS_SUBSCRIBE.format(not_found_id)
+        response = api_client.delete(url)
+        code_expected = status.HTTP_404_NOT_FOUND
+        assert response.status_code == code_expected, (
+            f"Убедитесь, что при запросе `{url}` "
+            f"на отписку от несуществующего пользователя, "
+            f"возвращается код {code_expected}."
+        )
+        json = response.json()
+        assert json.get(
+            "detail"
+        ), f"Убедитесь, что при запросе `{url}` возвращается текст ошибки."

@@ -38,10 +38,6 @@ class User(AbstractUser):
     def get_name(self):
         return self.get_full_name() or self.get_username()
 
-    @property
-    def is_subscribed(self):
-        return False
-
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "first_name", "last_name"]
 

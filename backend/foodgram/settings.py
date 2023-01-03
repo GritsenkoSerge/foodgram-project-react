@@ -99,12 +99,14 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 100,
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "NON_FIELD_ERRORS_KEY": "errors",
 }
 
 DJOSER = {
     "LOGOUT_ON_PASSWORD_CHANGE": True,
     "SERIALIZERS": {
-        "user": "users.serializers.UserSerializer",
+        "user": "api.serializers.UserWithIsSubscribedSerializer",
+        "current_user": "api.serializers.UserWithIsSubscribedSerializer",
     },
 }
 

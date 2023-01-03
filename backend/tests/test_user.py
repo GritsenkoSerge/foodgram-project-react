@@ -20,6 +20,7 @@ class TestUser:
         "last_name": (models.CharField, None),
     }
     URL_USERS = r"/api/users/"
+    URL_USERS_ID = r"/api/users/{}/"
     URL_USERS_ME = r"/api/users/me/"
     URL_USERS_SET_PASSWORD = r"/api/users/set_password/"
 
@@ -56,33 +57,43 @@ class TestUser:
             f"Убедитесь, что при запросе `{url}` с некорректными параметрами "
             f"возвращается код {code_expected}."
         )
+        json = response.json()
+        assert all(
+            map(json.get, data.keys())
+        ), f"Убедитесь, что при запросе `{url}` возвращается текст ошибки."
         response = client.post(url, data=data)
         code_expected = status.HTTP_201_CREATED
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
             f"и корректными данными возвращается код {code_expected}."
         )
-        assert response.json().get("email") == "new" + user.email, (
+        json = response.json()
+        assert json.get("email") == "new" + user.email, (
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
             f"и корректными данными возвращается зарегистрированный пользователь."
+        )
+        assert json.get("is_subscribed") is None, (
+            f"Убедитесь, что при запросе `{url}` с аутентификацией "
+            f"и корректными данными не возвращается is_subscribed."
         )
 
     @pytest.mark.django_db(transaction=True)
     def test_user_id_get(self, client, api_client, user):
-        url = f"{self.URL_USERS}0/"
-        response = client.get(url)
-        code_expected = status.HTTP_401_UNAUTHORIZED
-        assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` без аутентификации "
-            f"возвращается код {code_expected}."
-        )
+        not_found_id = "404"
+        url = self.URL_USERS_ID.format(not_found_id)
         response = api_client.get(url)
         code_expected = status.HTTP_404_NOT_FOUND
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` не существующего id "
             f"возвращается код {code_expected}."
         )
-        url = f"{self.URL_USERS}{user.id}/"
+        url = self.URL_USERS_ID.format(user.id)
+        response = client.get(url)
+        code_expected = status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == code_expected, (
+            f"Убедитесь, что при запросе `{url}` без аутентификации "
+            f"возвращается код {code_expected}."
+        )
         response = api_client.get(url)
         code_expected = status.HTTP_200_OK
         assert response.status_code == code_expected, (
@@ -109,7 +120,12 @@ class TestUser:
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
             f"возвращается код {code_expected}."
         )
-        assert response.json().get("email") == user.email, (
+        json = response.json()
+        assert json.get("email") == user.email, (
+            f"Убедитесь, что при запросе `{url}` с аутентификацией "
+            f"возвращает данные пользователя."
+        )
+        assert json.get("is_subscribed") == False, (
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
             f"возвращает данные пользователя."
         )
