@@ -1,7 +1,8 @@
 from django.urls import include, path
 from djoser.views import UserViewSet, TokenDestroyView
+from rest_framework import routers
 
-from .views import TokenCreateView, UserWithRecipesViewSet
+from .views import TagViewSet, TokenCreateView, UserWithRecipesViewSet
 
 app_name = "api"
 
@@ -31,7 +32,11 @@ users_patterns = [
     ),
 ]
 
+router = routers.DefaultRouter()
+router.register(r"tags", TagViewSet, basename="tags")
+
 urlpatterns = [
+    path(r"", include(router.urls)),
     path(r"auth/", include(auth_patterns)),
     path(r"users/", include(users_patterns)),
 ]
