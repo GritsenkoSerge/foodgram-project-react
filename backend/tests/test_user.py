@@ -38,7 +38,7 @@ class TestUser:
         code_expected = status.HTTP_200_OK
         assert (
             response.status_code == code_expected
-        ), f"Убедитесь, что при запросе `{url}` возвращается код {code_expected}."
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
 
     @pytest.mark.django_db(transaction=True)
     def test_user_post(self, client, user):
@@ -54,27 +54,27 @@ class TestUser:
         response = client.post(url)
         code_expected = status.HTTP_400_BAD_REQUEST
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с некорректными параметрами "
+            f"Убедитесь, что при запросе `{url}` с некорректными параметрами, "
             f"возвращается код {code_expected}."
         )
         json = response.json()
         assert all(
             map(json.get, data.keys())
-        ), f"Убедитесь, что при запросе `{url}` возвращается текст ошибки."
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
         response = client.post(url, data=data)
         code_expected = status.HTTP_201_CREATED
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
-            f"и корректными данными возвращается код {code_expected}."
+            f"и корректными данными, возвращается код {code_expected}."
         )
         json = response.json()
         assert json.get("email") == "new" + user.email, (
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
-            f"и корректными данными возвращается зарегистрированный пользователь."
+            f"и корректными данными, возвращается зарегистрированный пользователь."
         )
         assert json.get("is_subscribed") is None, (
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
-            f"и корректными данными не возвращается is_subscribed."
+            f"и корректными данными, не возвращается is_subscribed."
         )
 
     @pytest.mark.django_db(transaction=True)
@@ -84,25 +84,25 @@ class TestUser:
         response = api_client.get(url)
         code_expected = status.HTTP_404_NOT_FOUND
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` не существующего id "
+            f"Убедитесь, что при запросе `{url}` не существующего id, "
             f"возвращается код {code_expected}."
         )
         url = self.URL_USERS_ID.format(user.id)
         response = client.get(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` без аутентификации "
+            f"Убедитесь, что при запросе `{url}` без аутентификации, "
             f"возвращается код {code_expected}."
         )
         response = api_client.get(url)
         code_expected = status.HTTP_200_OK
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с аутентификацией "
+            f"Убедитесь, что при запросе `{url}` с аутентификацией, "
             f"возвращается код {code_expected}."
         )
         assert response.json().get("email") == user.email, (
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
-            f"и корректными данными возвращаются данные пользователя."
+            f"и корректными данными, возвращаются данные пользователя."
         )
 
     @pytest.mark.django_db(transaction=True)
@@ -111,13 +111,13 @@ class TestUser:
         response = client.get(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` без аутентификации "
+            f"Убедитесь, что при запросе `{url}` без аутентификации, "
             f"возвращается код {code_expected}."
         )
         response = api_client.get(url)
         code_expected = status.HTTP_200_OK
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с аутентификацией "
+            f"Убедитесь, что при запросе `{url}` с аутентификацией, "
             f"возвращается код {code_expected}."
         )
         json = response.json()
@@ -125,8 +125,8 @@ class TestUser:
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
             f"возвращает данные пользователя."
         )
-        assert json.get("is_subscribed") == False, (
-            f"Убедитесь, что при запросе `{url}` с аутентификацией "
+        assert not json.get("is_subscribed"), (
+            f"Убедитесь, что при запросе `{url}` с аутентификацией, "
             f"возвращает данные пользователя."
         )
 
@@ -136,7 +136,7 @@ class TestUser:
         response = client.post(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` без аутентификации "
+            f"Убедитесь, что при запросе `{url}` без аутентификации, "
             f"возвращается код {code_expected}."
         )
         data = {}
@@ -144,7 +144,7 @@ class TestUser:
         code_expected = status.HTTP_400_BAD_REQUEST
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с аутентификацией "
-            f"и невалидными данными возвращается код {code_expected}."
+            f"и невалидными данными, возвращается код {code_expected}."
         )
         required_fields = (
             "new_password",
@@ -153,13 +153,13 @@ class TestUser:
         json = response.json()
         for field in required_fields:
             assert field in json, (
-                f"Убедитесь, что при запросе `{url}` с невалидными данными "
+                f"Убедитесь, что при запросе `{url}` с невалидными данными, "
                 f"возвращается ошибка с указанием поля {field}."
             )
         data = {"new_password": "1234qwer!@#$QWER", "current_password": user_password}
         response = api_client.post(url, data=data)
         code_expected = status.HTTP_204_NO_CONTENT
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с валидными данными "
+            f"Убедитесь, что при запросе `{url}` с валидными данными, "
             f"возвращается код {code_expected}."
         )

@@ -6,6 +6,8 @@ from mixer.backend.django import mixer as _mixer
 from rest_framework.test import APIClient
 
 from foodgram.settings import INSTALLED_APPS
+from ingredients.models import Ingredient
+from tags.models import Tag
 from users.models import Subscription
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -102,3 +104,19 @@ def mixer():
 @pytest.fixture
 def subscription(mixer, user, another_user):
     return mixer.blend(Subscription, user=user, author=another_user)
+
+
+@pytest.fixture
+def tag():
+    return Tag.objects.create(name="Завтрак", color="#E26C2D", slug="breakfast")
+
+
+@pytest.fixture
+def ingredient():
+    return Tag.objects.create(name="Капуста", measurement_unit="кг")
+
+
+@pytest.fixture
+def few_ingredients(mixer):
+    ingredients = mixer.cycle(10).blend(Ingredient)
+    return ingredients[0]

@@ -55,6 +55,3 @@ class SubscriptionSerializer(serializers.ModelSerializer):
                 "Нельзя подписаться дважды на одного пользователя!"
             )
         return super().validate(attrs)
-
-    def save(self, **kwargs):
-        return super().save(**kwargs)

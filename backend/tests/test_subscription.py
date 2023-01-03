@@ -48,9 +48,9 @@ class TestSubscription:
             f"возвращается код {code_expected}."
         )
         json = response.json()
-        assert json.get("count") == 1, (
-            f"Убедитесь, что при запросе `{url}` " "возвращается код одна подписка."
-        )
+        assert (
+            json.get("count") == 1
+        ), f"Убедитесь, что при запросе `{url}`, возвращается одна подписка."
 
     # post /api/users/{id}/subscribe/ 401
     @pytest.mark.django_db(transaction=True)
@@ -72,26 +72,26 @@ class TestSubscription:
         response = api_client.post(url)
         code_expected = status.HTTP_400_BAD_REQUEST
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` , "
+            f"Убедитесь, что при запросе `{url}`, "
             f"на подписку на самого себя, "
             f"возвращается код {code_expected}."
         )
         json = response.json()
         assert json.get(
             "errors"
-        ), f"Убедитесь, что при запросе `{url}` возвращается текст ошибки."
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
         url = self.URL_USERS_SUBSCRIBE.format(subscription.author.id)
         response = api_client.post(url)
         code_expected = status.HTTP_400_BAD_REQUEST
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` , "
+            f"Убедитесь, что при запросе `{url}`, "
             f"на уже имеющуюся подписку, "
             f"возвращается код {code_expected}."
         )
         json = response.json()
         assert json.get(
             "errors"
-        ), f"Убедитесь, что при запросе `{url}` возвращается текст ошибки."
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
 
     # post /api/users/{id}/subscribe/ 404
     @pytest.mark.django_db(transaction=True)
@@ -113,12 +113,12 @@ class TestSubscription:
         response = api_client.post(url)
         code_expected = status.HTTP_201_CREATED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей "
+            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей, "
             f"возвращается код {code_expected}."
         )
         json = response.json()
         assert json.get("is_subscribed"), (
-            f"Убедитесь, что при запросе `{url}` возвращается данные пользователя, "
+            f"Убедитесь, что при запросе `{url}`, возвращается данные пользователя, "
             "на которого подписались, с is_subscribed=true."
         )
 
@@ -129,12 +129,12 @@ class TestSubscription:
         response = api_client.delete(url)
         code_expected = status.HTTP_204_NO_CONTENT
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей "
+            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей, "
             f"возвращается код {code_expected}."
         )
         assert (
             not response.content
-        ), f"Убедитесь, что при запросе `{url}` возвращается пустой content."
+        ), f"Убедитесь, что при запросе `{url}`, возвращается пустой content."
 
     # delete /api/users/{id}/subscribe/ 400
     @pytest.mark.django_db(transaction=True)
@@ -143,13 +143,13 @@ class TestSubscription:
         response = api_client.delete(url)
         code_expected = status.HTTP_400_BAD_REQUEST
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей "
+            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей, "
             f"возвращается код {code_expected}."
         )
         json = response.json()
         assert json.get(
             "errors"
-        ), f"Убедитесь, что при запросе `{url}` возвращается текст ошибки."
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
 
     # delete /api/users/{id}/subscribe/ 401
     @pytest.mark.django_db(transaction=True)
@@ -160,13 +160,13 @@ class TestSubscription:
         response = client.delete(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей "
+            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей, "
             f"возвращается код {code_expected}."
         )
         json = response.json()
         assert json.get(
             "detail"
-        ), f"Убедитесь, что при запросе `{url}` возвращается текст ошибки."
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
 
     # delete /api/users/{id}/subscribe/ 404
     @pytest.mark.django_db(transaction=True)
@@ -183,4 +183,4 @@ class TestSubscription:
         json = response.json()
         assert json.get(
             "detail"
-        ), f"Убедитесь, что при запросе `{url}` возвращается текст ошибки."
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
