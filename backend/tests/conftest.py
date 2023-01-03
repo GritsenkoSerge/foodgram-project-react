@@ -113,7 +113,7 @@ def tag():
 
 @pytest.fixture
 def ingredient():
-    return Tag.objects.create(name="Капуста", measurement_unit="кг")
+    return Ingredient.objects.create(name="Капуста", measurement_unit="кг")
 
 
 @pytest.fixture
