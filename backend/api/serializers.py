@@ -1,6 +1,7 @@
 from djoser import serializers as djoser_serializers
 from rest_framework import serializers as serializers
 
+from tags.models import Tag
 from users.models import Subscription, User
 
 
@@ -55,3 +56,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
                 "Нельзя подписаться дважды на одного пользователя!"
             )
         return super().validate(attrs)
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = "__all__"
