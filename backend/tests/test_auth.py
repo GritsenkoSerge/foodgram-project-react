@@ -56,7 +56,7 @@ class TestAuth:
         }
         response = client.get(url, **headers)
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей, "
+            f"Убедитесь, что при запросе `{url}` с имеющейся авторизацией, "
             f"возвращается код {code_expected}."
         )
 
@@ -66,7 +66,7 @@ class TestAuth:
         response = client.post(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` без имеющейся аутентификации, "
+            f"Убедитесь, что при запросе `{url}` без имеющейся авторизации, "
             f"возвращается код {code_expected}."
         )
 
@@ -77,6 +77,6 @@ class TestAuth:
         response = api_client.post(url)
         code_expected = status.HTTP_204_NO_CONTENT
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацией, "
+            f"Убедитесь, что при запросе `{url}` с имеющейся авторизацией, "
             f"возвращается код {code_expected}."
         )

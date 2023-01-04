@@ -105,8 +105,8 @@ REST_FRAMEWORK = {
 DJOSER = {
     "LOGOUT_ON_PASSWORD_CHANGE": True,
     "SERIALIZERS": {
-        "user": "api.serializers.UserWithIsSubscribedSerializer",
-        "current_user": "api.serializers.UserWithIsSubscribedSerializer",
+        "user": "api.serializers.UserSerializer",
+        "current_user": "api.serializers.UserSerializer",
     },
 }
 

@@ -64,16 +64,16 @@ class TestUser:
         response = client.post(url, data=data)
         code_expected = status.HTTP_201_CREATED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с аутентификацией "
+            f"Убедитесь, что при запросе `{url}` с авторизацией "
             f"и корректными данными, возвращается код {code_expected}."
         )
         json = response.json()
         assert json.get("email") == "new" + user.email, (
-            f"Убедитесь, что при запросе `{url}` с аутентификацией "
+            f"Убедитесь, что при запросе `{url}` с авторизацией "
             f"и корректными данными, возвращается зарегистрированный пользователь."
         )
         assert json.get("is_subscribed") is None, (
-            f"Убедитесь, что при запросе `{url}` с аутентификацией "
+            f"Убедитесь, что при запросе `{url}` с авторизацией "
             f"и корректными данными, не возвращается is_subscribed."
         )
 
@@ -91,17 +91,17 @@ class TestUser:
         response = client.get(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` без аутентификации, "
+            f"Убедитесь, что при запросе `{url}` без авторизации, "
             f"возвращается код {code_expected}."
         )
         response = api_client.get(url)
         code_expected = status.HTTP_200_OK
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с аутентификацией, "
+            f"Убедитесь, что при запросе `{url}` с авторизацией, "
             f"возвращается код {code_expected}."
         )
         assert response.json().get("email") == user.email, (
-            f"Убедитесь, что при запросе `{url}` с аутентификацией "
+            f"Убедитесь, что при запросе `{url}` с авторизацией "
             f"и корректными данными, возвращаются данные пользователя."
         )
 
@@ -111,22 +111,22 @@ class TestUser:
         response = client.get(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` без аутентификации, "
+            f"Убедитесь, что при запросе `{url}` без авторизации, "
             f"возвращается код {code_expected}."
         )
         response = api_client.get(url)
         code_expected = status.HTTP_200_OK
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с аутентификацией, "
+            f"Убедитесь, что при запросе `{url}` с авторизацией, "
             f"возвращается код {code_expected}."
         )
         json = response.json()
         assert json.get("email") == user.email, (
-            f"Убедитесь, что при запросе `{url}` с аутентификацией "
+            f"Убедитесь, что при запросе `{url}` с авторизацией "
             f"возвращает данные пользователя."
         )
         assert not json.get("is_subscribed"), (
-            f"Убедитесь, что при запросе `{url}` с аутентификацией, "
+            f"Убедитесь, что при запросе `{url}` с авторизацией, "
             f"возвращает данные пользователя."
         )
 
@@ -136,14 +136,14 @@ class TestUser:
         response = client.post(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` без аутентификации, "
+            f"Убедитесь, что при запросе `{url}` без авторизации, "
             f"возвращается код {code_expected}."
         )
         data = {}
         response = api_client.post(url, data=data)
         code_expected = status.HTTP_400_BAD_REQUEST
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с аутентификацией "
+            f"Убедитесь, что при запросе `{url}` с авторизацией "
             f"и невалидными данными, возвращается код {code_expected}."
         )
         required_fields = (

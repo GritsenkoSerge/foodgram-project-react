@@ -36,7 +36,7 @@ class TestIngredient:
         json = response.json()
         assert (
             isinstance(json, list) and len(json) == amount
-        ), f"Убедитесь, что при запросе `{url}`, возвращается список с одним тегом."
+        ), f"Убедитесь, что при запросе `{url}`, возвращается список ингредиентов."
         fields = (
             "id",
             "name",
@@ -46,11 +46,11 @@ class TestIngredient:
             f"Убедитесь, что при запросе `{url}`, "
             f"возвращается ингредиент с полями {fields}"
         )
-        startwith = few_ingredients.name[:1]
-        url = self.URL_INGREDIENTS + f"?name={startwith}"
+        startswith = few_ingredients.name[:1]
+        url = self.URL_INGREDIENTS + f"?name={startswith}"
         response = client.get(url)
         code_expected = status.HTTP_200_OK
-        amount = Ingredient.objects.filter(name__startswith=startwith).count()
+        amount = Ingredient.objects.filter(name__startswith=startswith).count()
         json = response.json()
         assert (
             len(json) == amount

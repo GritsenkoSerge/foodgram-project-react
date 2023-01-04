@@ -9,22 +9,6 @@ from tags.models import Tag
 User = get_user_model()
 
 
-class RecipeIngredient(models.Model):
-    ingredient = models.ForeignKey(
-        Ingredient,
-        on_delete=models.RESTRICT,
-        verbose_name="Ингредиент рецепта",
-        help_text="Выберите ингредиент рецепта",
-    )
-    amount = models.PositiveIntegerField(
-        "Количество ингридиента", help_text="Введите количество ингридиента"
-    )
-
-    class Meta:
-        verbose_name = "Ингредиент рецепта"
-        verbose_name_plural = "Ингредиенты рецептов"
-
-
 class Recipe(models.Model):
     created = models.DateTimeField(
         "Дата создания",
@@ -53,9 +37,10 @@ class Recipe(models.Model):
         help_text="Введите время приготовления в минутах",
     )
     ingredients = models.ManyToManyField(
-        RecipeIngredient,
+        Ingredient,
+        through="RecipeIngredient",
         verbose_name="Ингредиенты",
-        help_text="Выберите количество ингредиентов",
+        help_text="Выберите ингредиенты",
     )
     tags = models.ManyToManyField(Tag, verbose_name="Теги", help_text="Выберите теги")
     favorites = models.ManyToManyField(
@@ -82,3 +67,25 @@ class Recipe(models.Model):
         verbose_name_plural = "Рецепты"
         default_related_name = "%(class)ss"
         ordering = ("created",)
+
+
+class RecipeIngredient(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.RESTRICT,
+        verbose_name="Ингредиент рецепта",
+        help_text="Выберите ингредиент рецепта",
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.RESTRICT,
+        verbose_name="Ингредиент рецепта",
+        help_text="Выберите ингредиент рецепта",
+    )
+    amount = models.PositiveIntegerField(
+        "Количество ингридиента", help_text="Введите количество ингридиента"
+    )
+
+    class Meta:
+        verbose_name = "Ингредиент рецепта"
+        verbose_name_plural = "Ингредиенты рецептов"
