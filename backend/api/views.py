@@ -3,16 +3,19 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from djoser import views
 from rest_framework import mixins, status, viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
+from api.permissions import IsAuthorOrReadOnly
 from api.serializers import (
     IngredientSerializer,
+    RecipeSerializer,
     UserWithRecipesSerializer,
     SubscriptionSerializer,
     TagSerializer,
 )
 from ingredients.models import Ingredient
+from recipes.models import Recipe
 from tags.models import Tag
 from users.models import Subscription, User
 
@@ -98,3 +101,30 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
         if name is not None:
             queryset = queryset.filter(name__startswith=name)
         return queryset
+
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    serializer_class = RecipeSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly)
+
+    def get_queryset(self):
+        queryset = Recipe.objects.all()
+        # TODO
+        # is_favorited = self.request.query_params.get("is_favorited")
+        # is_in_shopping_cart = self.request.query_params.get("is_in_shopping_cart")
+        # author = self.request.query_params.get("author")
+        # tags = self.request.query_params.get("tags")
+        # if name is not None:
+        #     queryset = queryset.filter(name__startswith=name)
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    # def handle_exception(self, exc):
+    #     response = super().handle_exception(exc)
+    #     if response.status_code == status.HTTP_401_UNAUTHORIZED:
+    #         return Response(
+    #             status=status.HTTP_401_UNAUTHORIZED, headers=response.headers
+    #         )
+    #     return response

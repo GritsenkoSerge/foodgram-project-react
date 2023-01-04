@@ -25,7 +25,7 @@ class Recipe(models.Model):
         "Название", max_length=settings.NAME_MAX_LENGTH, help_text="Введите название"
     )
     image = models.ImageField(
-        "Картинка",
+        "Recipe image",
         upload_to="recipes/",
         help_text="Выберите картинку",
     )
@@ -38,7 +38,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        through="RecipeIngredient",
+        through="IngredientInRecipe",
         verbose_name="Ингредиенты",
         help_text="Выберите ингредиенты",
     )
@@ -66,10 +66,10 @@ class Recipe(models.Model):
         verbose_name = "Рецепт"
         verbose_name_plural = "Рецепты"
         default_related_name = "%(class)ss"
-        ordering = ("created",)
+        ordering = ("-created",)
 
 
-class RecipeIngredient(models.Model):
+class IngredientInRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.RESTRICT,

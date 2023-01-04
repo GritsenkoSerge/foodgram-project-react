@@ -13,9 +13,9 @@ try:
 except ImportError:
     assert False, "Не найдена модель `Tag` в приложении `tags`"
 try:
-    from recipes.models import RecipeIngredient
+    from ingredients.models import Ingredient
 except ImportError:
-    assert False, "Не найдена модель `RecipeIngredient` в приложении `recipes`"
+    assert False, "Не найдена модель `Ingredient` в приложении `ingredients`"
 try:
     from recipes.models import Recipe
 except ImportError:
@@ -31,7 +31,7 @@ class TestRecipe:
         "image": (models.ImageField, None),
         "text": (models.TextField, None),
         "cooking_time": (models.PositiveIntegerField, None),
-        "ingredients": (models.ManyToManyField, RecipeIngredient),
+        "ingredients": (models.ManyToManyField, Ingredient),
         "tags": (models.ManyToManyField, Tag),
         "favorites": (models.ManyToManyField, User),
         "carts": (models.ManyToManyField, User),
@@ -44,7 +44,7 @@ class TestRecipe:
 
     # get /api/recipes/ 200
     @pytest.mark.django_db(transaction=True)
-    def test_recipe__get_valid(self, client):
+    def test_recipe__get_valid(self, client, recipe, recipe_ingredient):
         url = self.URL_RECIPES
         response = client.get(url)
         code_expected = status.HTTP_200_OK
@@ -61,7 +61,7 @@ class TestRecipe:
             "tags",
             "author",
             "ingredients",
-            "is_favaorited",
+            "is_favorited",
             "is_in_shopping_cart",
             "name",
             "image",
@@ -69,17 +69,20 @@ class TestRecipe:
             "cooking_time",
         )
         recipes = json.get("results")
-        assert isinstance(recipes, list) and all(map(recipes[0].get, fields)), (
+        assert isinstance(recipes, list) and isinstance(recipes[0], dict), (
+            f"Убедитесь, что при запросе `{url}`, " f"возвращается список рецептов."
+        )
+        assert all(map(lambda x: x in recipes[0], fields)), (
             f"Убедитесь, что при запросе `{url}`, "
             f"возвращаются рецепты с полями {fields}"
         )
         # фильтр по is_favorited (0/1), is_in_shopping_cart (0/1),
         # author (id), tags (slug)
-        is_favorited = 1
-        url = self.URL_RECIPES + f"?is_favorited={is_favorited}"
+        assert False, "ToDo is_favorited"
+        url = self.URL_RECIPES + "?is_favorited=1"
         response = client.get(url)
         code_expected = status.HTTP_200_OK
-        amount = Recipe.objects.filter(recipe__is_favorited=is_favorited).count()
+        amount = Recipe.objects.filter(is_favorited=True).count()
         json = response.json()
         assert (
             json.get("count") == amount
@@ -116,14 +119,14 @@ class TestRecipe:
             "tags",
             "author",
             "ingredients",
-            "is_favaorited",
+            "is_favorited",
             "is_in_shopping_cart",
             "name",
             "image",
             "text",
             "cooking_time",
         )
-        assert all(map(json.get, fields)), (
+        assert all(map(lambda x: x in json, fields)), (
             f"Убедитесь, что при запросе `{url}`, "
             f"возвращается рецепт с полями {fields}"
         )
@@ -150,7 +153,7 @@ class TestRecipe:
             "text",
             "cooking_time",
         )
-        assert all(map(json.get, fields)), (
+        assert all(map(lambda x: x in json, fields)), (
             f"Убедитесь, что при запросе `{url}`, "
             f"возвращается ошибки с полями {fields}"
         )
@@ -190,16 +193,16 @@ class TestRecipe:
             "ingredients": [{"id": not_found_id, "amount": 10}],
             "tags": [not_found_id],
             "image": (
-                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAA"
-                "CVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAA"
-                "AAggCByxOyYQAAAABJRU5ErkJggg=="
+                "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                "AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO"
+                "9TXL0Y4OHwAAAABJRU5ErkJggg=="
             ),
             "name": "recipe_name",
             "text": "string",
             "cooking_time": 1,
         }
         response = api_client.post(url, data=data)
-        code_expected = status.HTTP_201_CREATED
+        code_expected = status.HTTP_404_NOT_FOUND
         assert (
             response.status_code == code_expected
         ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
@@ -210,7 +213,7 @@ class TestRecipe:
 
     # get /api/recipes/{id}/ 200
     @pytest.mark.django_db(transaction=True)
-    def test_recipe__get_detail_valid(self, client, recipe):
+    def test_recipe__get_detail_valid(self, client, recipe, recipe_ingredient):
         url = self.URL_RECIPES_ID.format(recipe.id)
         response = client.get(url)
         code_expected = status.HTTP_200_OK
@@ -223,14 +226,14 @@ class TestRecipe:
             "tags",
             "author",
             "ingredients",
-            "is_favaorited",
+            "is_favorited",
             "is_in_shopping_cart",
             "name",
             "image",
             "text",
             "cooking_time",
         )
-        assert all(map(json.get, fields)), (
+        assert all(map(lambda x: x in json, fields)), (
             f"Убедитесь, что при запросе `{url}`, "
             f"возвращается рецепт с полями {fields}"
         )
@@ -263,14 +266,14 @@ class TestRecipe:
             "tags",
             "author",
             "ingredients",
-            "is_favaorited",
+            "is_favorited",
             "is_in_shopping_cart",
             "name",
             "image",
             "text",
             "cooking_time",
         )
-        assert all(map(json.get, fields)), (
+        assert all(map(lambda x: x in json, fields)), (
             f"Убедитесь, что при запросе `{url}`, "
             f"возвращается рецепт с полями {fields}"
         )
@@ -297,14 +300,14 @@ class TestRecipe:
             "tags",
             "author",
             "ingredients",
-            "is_favaorited",
+            "is_favorited",
             "is_in_shopping_cart",
             "name",
             "image",
             "text",
             "cooking_time",
         )
-        assert all(map(json.get, fields)), (
+        assert all(map(lambda x: x in json, fields)), (
             f"Убедитесь, что при запросе `{url}`, "
             f"возвращается рецепт с полями {fields}"
         )
