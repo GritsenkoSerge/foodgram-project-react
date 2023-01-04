@@ -7,6 +7,7 @@ from rest_framework.test import APIClient
 
 from foodgram.settings import INSTALLED_APPS
 from ingredients.models import Ingredient
+from recipes.models import Recipe
 from tags.models import Tag
 from users.models import Subscription
 
@@ -120,3 +121,13 @@ def ingredient():
 def few_ingredients(mixer):
     ingredients = mixer.cycle(10).blend(Ingredient)
     return ingredients[0]
+
+
+@pytest.fixture
+def recipe(mixer, user):
+    return mixer.blend(Recipe, author=user)
+
+
+@pytest.fixture
+def denied_recipe(mixer, another_user):
+    return mixer.blend(Recipe, author=another_user)

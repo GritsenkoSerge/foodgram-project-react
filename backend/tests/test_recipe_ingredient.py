@@ -2,10 +2,10 @@ from django.db import models
 
 from tests.utils import check_model_field_names
 
-try:
-    from recipes.models import Recipe
-except ImportError:
-    assert False, "Не найдена модель `Recipe` в приложении `recipes`"
+# try:
+#     from recipes.models import Recipe
+# except ImportError:
+#     assert False, "Не найдена модель `Recipe` в приложении `recipes`"
 try:
     from ingredients.models import Ingredient
 except ImportError:

@@ -1,7 +1,7 @@
+import pytest
 from django.db import models
+from rest_framework import status
 
-from recipes.models import RecipeIngredient
-from tags.models import Tag
 from tests.utils import check_model_field_names
 
 try:
@@ -36,6 +36,466 @@ class TestRecipe:
         "favorites": (models.ManyToManyField, User),
         "carts": (models.ManyToManyField, User),
     }
+    URL_RECIPES = "/api/recipes/"
+    URL_RECIPES_ID = "/api/recipes/{}/"
 
     def test_recipe_model(self):
         check_model_field_names(self.MODEL, self.MODEL_FIELDS)
+
+    # get /api/recipes/ 200
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__get_valid(self, client):
+        url = self.URL_RECIPES
+        response = client.get(url)
+        code_expected = status.HTTP_200_OK
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        amount = Recipe.objects.count()
+        json = response.json()
+        assert (
+            json.get("count") == amount
+        ), f"Убедитесь, что при запросе `{url}`, возвращается список рецептов."
+        fields = (
+            "id",
+            "tags",
+            "author",
+            "ingredients",
+            "is_favaorited",
+            "is_in_shopping_cart",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
+        )
+        recipes = json.get("results")
+        assert isinstance(recipes, list) and all(map(recipes[0].get, fields)), (
+            f"Убедитесь, что при запросе `{url}`, "
+            f"возвращаются рецепты с полями {fields}"
+        )
+        # фильтр по is_favorited (0/1), is_in_shopping_cart (0/1),
+        # author (id), tags (slug)
+        is_favorited = 1
+        url = self.URL_RECIPES + f"?is_favorited={is_favorited}"
+        response = client.get(url)
+        code_expected = status.HTTP_200_OK
+        amount = Recipe.objects.filter(recipe__is_favorited=is_favorited).count()
+        json = response.json()
+        assert (
+            json.get("count") == amount
+        ), f"Убедитесь, что при запросе `{url}`, рецепты фильтруются по избранным."
+        assert False, "ToDo is_in_shopping_cart"
+        assert False, "ToDo author"
+        assert False, "ToDo tags"
+
+    # post /api/recipes/ 201
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__create_valid(self, api_client, tag, ingredient):
+        url = self.URL_RECIPES
+        recipe_name = "Recipe name"
+        data = {
+            "ingredients": [{"id": ingredient.id, "amount": 10}],
+            "tags": [tag.id],
+            "image": (
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAA"
+                "CVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAA"
+                "AAggCByxOyYQAAAABJRU5ErkJggg=="
+            ),
+            "name": recipe_name,
+            "text": "string",
+            "cooking_time": 1,
+        }
+        response = api_client.post(url, data=data)
+        code_expected = status.HTTP_201_CREATED
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        fields = (
+            "id",
+            "tags",
+            "author",
+            "ingredients",
+            "is_favaorited",
+            "is_in_shopping_cart",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
+        )
+        assert all(map(json.get, fields)), (
+            f"Убедитесь, что при запросе `{url}`, "
+            f"возвращается рецепт с полями {fields}"
+        )
+        assert json.get("name") == recipe_name, (
+            f"Убедитесь, что при запросе `{url}`, "
+            f"возвращается рецепт с названием `{fields}`"
+        )
+
+    # post /api/recipes/ 400
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__create_invalid(self, api_client):
+        url = self.URL_RECIPES
+        response = api_client.post(url, data={})
+        code_expected = status.HTTP_400_BAD_REQUEST
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        fields = (
+            "ingredients",
+            "tags",
+            "image",
+            "name",
+            "text",
+            "cooking_time",
+        )
+        assert all(map(json.get, fields)), (
+            f"Убедитесь, что при запросе `{url}`, "
+            f"возвращается ошибки с полями {fields}"
+        )
+
+    # post /api/recipes/ 401
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__create_unauthorized(self, client, tag, ingredient):
+        url = self.URL_RECIPES
+        recipe_name = "Recipe name"
+        data = {
+            "ingredients": [{"id": ingredient.id, "amount": 10}],
+            "tags": [tag.id],
+            "image": (
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAA"
+                "CVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAA"
+                "AAggCByxOyYQAAAABJRU5ErkJggg=="
+            ),
+            "name": recipe_name,
+            "text": "string",
+            "cooking_time": 1,
+        }
+        response = client.post(url, data=data)
+        code_expected = status.HTTP_401_UNAUTHORIZED
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        assert (
+            not response.content
+        ), f"Убедитесь, что при запросе `{url}`, возвращается пустой content."
+
+    # post /api/recipes/ 404
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__create_not_found(self, api_client):
+        not_found_id = 404
+        url = self.URL_RECIPES
+        data = {
+            "ingredients": [{"id": not_found_id, "amount": 10}],
+            "tags": [not_found_id],
+            "image": (
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAA"
+                "CVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAA"
+                "AAggCByxOyYQAAAABJRU5ErkJggg=="
+            ),
+            "name": "recipe_name",
+            "text": "string",
+            "cooking_time": 1,
+        }
+        response = api_client.post(url, data=data)
+        code_expected = status.HTTP_201_CREATED
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        assert json.get(
+            "detail"
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
+
+    # get /api/recipes/{id}/ 200
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__get_detail_valid(self, client, recipe):
+        url = self.URL_RECIPES_ID.format(recipe.id)
+        response = client.get(url)
+        code_expected = status.HTTP_200_OK
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        fields = (
+            "id",
+            "tags",
+            "author",
+            "ingredients",
+            "is_favaorited",
+            "is_in_shopping_cart",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
+        )
+        assert all(map(json.get, fields)), (
+            f"Убедитесь, что при запросе `{url}`, "
+            f"возвращается рецепт с полями {fields}"
+        )
+
+    # patch /api/recipes/{id}/ 200
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__update_valid(self, api_client, recipe, ingredient, tag):
+        url = self.URL_RECIPES_ID.format(recipe.id)
+        recipe_name = "Recipe name"
+        data = {
+            "ingredients": [{"id": ingredient.id, "amount": 10}],
+            "tags": [tag.id],
+            "image": (
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAA"
+                "CVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAA"
+                "AAggCByxOyYQAAAABJRU5ErkJggg=="
+            ),
+            "name": recipe_name,
+            "text": "string",
+            "cooking_time": 1,
+        }
+        response = api_client.patch(url, data=data)
+        code_expected = status.HTTP_200_OK
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        fields = (
+            "id",
+            "tags",
+            "author",
+            "ingredients",
+            "is_favaorited",
+            "is_in_shopping_cart",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
+        )
+        assert all(map(json.get, fields)), (
+            f"Убедитесь, что при запросе `{url}`, "
+            f"возвращается рецепт с полями {fields}"
+        )
+        assert json.get("name") == recipe_name, (
+            f"Убедитесь, что при запросе `{url}`, "
+            f"возвращается рецепт с названием `{fields}`"
+        )
+
+    # patch /api/recipes/{id}/ 400
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__update_invalid(
+        self, api_client, recipe, ingredient, tag, few_ingredients
+    ):
+        url = self.URL_RECIPES_ID.format(recipe.id)
+        recipe_name = "Recipe name"
+        response = api_client.patch(url, data={})
+        code_expected = status.HTTP_400_BAD_REQUEST
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        fields = (
+            "id",
+            "tags",
+            "author",
+            "ingredients",
+            "is_favaorited",
+            "is_in_shopping_cart",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
+        )
+        assert all(map(json.get, fields)), (
+            f"Убедитесь, что при запросе `{url}`, "
+            f"возвращается рецепт с полями {fields}"
+        )
+        assert json.get("name") == recipe_name, (
+            f"Убедитесь, что при запросе `{url}`, "
+            f"возвращается рецепт с названием `{fields}`"
+        )
+        data = {
+            "ingredients": [
+                {"id": ingredient.id, "amount": 10},
+                {"id": few_ingredients.id, "amount": 0},
+            ],
+            "tags": [tag.id],
+            "image": (
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAA"
+                "CVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAA"
+                "AAggCByxOyYQAAAABJRU5ErkJggg=="
+            ),
+            "name": recipe_name,
+            "text": "string",
+            "cooking_time": 1,
+        }
+        response = api_client.patch(url, data=data)
+        code_expected = status.HTTP_400_BAD_REQUEST
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        ingredients = json.get("ingredients")
+        assert isinstance(ingredients, list) and len(ingredients), (
+            f"Убедитесь, что при запросе `{url}`, "
+            f"возвращается список ingredients с двумя записями."
+        )
+        assert ingredients[0] == {} and ingredients[1].get("amount"), (
+            f"Убедитесь, что при запросе `{url}`, "
+            f"возвращается список ingredients с указанием ошибочной записи."
+        )
+
+    # patch /api/recipes/{id}/ 401
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__update_unauthorized(self, client, recipe, ingredient, tag):
+        url = self.URL_RECIPES_ID.format(recipe.id)
+        data = {
+            "ingredients": [{"id": ingredient.id, "amount": 10}],
+            "tags": [tag.id],
+            "image": (
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAA"
+                "CVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAA"
+                "AAggCByxOyYQAAAABJRU5ErkJggg=="
+            ),
+            "name": "recipe_name",
+            "text": "string",
+            "cooking_time": 1,
+        }
+        response = client.patch(url, data=data)
+        code_expected = status.HTTP_401_UNAUTHORIZED
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        assert json.get(
+            "detail"
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
+
+    # patch /api/recipes/{id}/ 403
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__update_denied(self, api_client, denied_recipe, ingredient, tag):
+        url = self.URL_RECIPES_ID.format(denied_recipe.id)
+        data = {
+            "ingredients": [{"id": ingredient.id, "amount": 10}],
+            "tags": [tag.id],
+            "image": (
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAA"
+                "CVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAA"
+                "AAggCByxOyYQAAAABJRU5ErkJggg=="
+            ),
+            "name": "recipe_name",
+            "text": "string",
+            "cooking_time": 1,
+        }
+        response = api_client.patch(url, data=data)
+        code_expected = status.HTTP_403_FORBIDDEN
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        assert json.get(
+            "detail"
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
+
+    # patch /api/recipes/{id}/ 404
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__update_not_found(self, client, recipe, ingredient, tag):
+        not_found_id = 404
+        url = self.URL_RECIPES_ID.format(recipe.id)
+        data = {
+            "ingredients": [{"id": not_found_id, "amount": 10}],
+            "tags": [not_found_id],
+            "image": (
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAA"
+                "CVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAA"
+                "AAggCByxOyYQAAAABJRU5ErkJggg=="
+            ),
+            "name": "recipe_name",
+            "text": "string",
+            "cooking_time": 1,
+        }
+        response = client.patch(url, data=data)
+        code_expected = status.HTTP_401_UNAUTHORIZED
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        assert json.get(
+            "detail"
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
+        url = self.URL_RECIPES_ID.format(not_found_id)
+        data = {
+            "ingredients": [{"id": ingredient.id, "amount": 10}],
+            "tags": [tag.id],
+            "image": (
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAA"
+                "CVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAA"
+                "AAggCByxOyYQAAAABJRU5ErkJggg=="
+            ),
+            "name": "recipe_name",
+            "text": "string",
+            "cooking_time": 1,
+        }
+        response = client.patch(url, data=data)
+        code_expected = status.HTTP_401_UNAUTHORIZED
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        assert json.get(
+            "detail"
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
+
+    # delete /api/recipes/{id}/ 204
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__delete_valid(self, api_client, recipe):
+        url = self.URL_RECIPES_ID.format(recipe.id)
+        response = api_client.delete(url)
+        code_expected = status.HTTP_204_NO_CONTENT
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        assert (
+            not response.content
+        ), f"Убедитесь, что при запросе `{url}`, возвращается пустой content."
+
+    # delete /api/recipes/{id}/ 401
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__delete_unauthorized(self, client, recipe):
+        url = self.URL_RECIPES_ID.format(recipe.id)
+        response = client.delete(url)
+        code_expected = status.HTTP_401_UNAUTHORIZED
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        assert json.get(
+            "detail"
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
+
+    # delete /api/recipes/{id}/ 403
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__delete_denied(self, api_client, denied_recipe):
+        url = self.URL_RECIPES_ID.format(denied_recipe.id)
+        response = api_client.delete(url)
+        code_expected = status.HTTP_403_FORBIDDEN
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        assert json.get(
+            "detail"
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
+
+    # delete /api/recipes/{id}/ 404
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__delete_not_found(self, api_client):
+        not_found_id = 404
+        url = self.URL_RECIPES_ID.format(not_found_id)
+        response = api_client.delete(url)
+        code_expected = status.HTTP_404_NOT_FOUND
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        json = response.json()
+        assert json.get(
+            "detail"
+        ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."

@@ -33,7 +33,7 @@ class TestSubscription:
         response = client.get(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` без имеющейся аутентификации, "
+            f"Убедитесь, что при запросе `{url}` без имеющейся авторизации, "
             f"возвращается код {code_expected}."
         )
 
@@ -44,7 +44,7 @@ class TestSubscription:
         response = api_client.get(url)
         code_expected = status.HTTP_200_OK
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей, "
+            f"Убедитесь, что при запросе `{url}` с имеющейся авторизацией, "
             f"возвращается код {code_expected}."
         )
         json = response.json()
@@ -59,7 +59,7 @@ class TestSubscription:
         response = client.post(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` без имеющейся аутентификации, "
+            f"Убедитесь, что при запросе `{url}` без имеющейся авторизации, "
             f"возвращается код {code_expected}."
         )
 
@@ -113,7 +113,7 @@ class TestSubscription:
         response = api_client.post(url)
         code_expected = status.HTTP_201_CREATED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей, "
+            f"Убедитесь, что при запросе `{url}` с имеющейся авторизацией, "
             f"возвращается код {code_expected}."
         )
         json = response.json()
@@ -129,7 +129,7 @@ class TestSubscription:
         response = api_client.delete(url)
         code_expected = status.HTTP_204_NO_CONTENT
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей, "
+            f"Убедитесь, что при запросе `{url}` с имеющейся авторизацией, "
             f"возвращается код {code_expected}."
         )
         assert (
@@ -143,7 +143,7 @@ class TestSubscription:
         response = api_client.delete(url)
         code_expected = status.HTTP_400_BAD_REQUEST
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей, "
+            f"Убедитесь, что при запросе `{url}` с имеющейся авторизацией, "
             f"возвращается код {code_expected}."
         )
         json = response.json()
@@ -160,7 +160,7 @@ class TestSubscription:
         response = client.delete(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert response.status_code == code_expected, (
-            f"Убедитесь, что при запросе `{url}` с имеющейся аутентификацей, "
+            f"Убедитесь, что при запросе `{url}` без авторизации, "
             f"возвращается код {code_expected}."
         )
         json = response.json()

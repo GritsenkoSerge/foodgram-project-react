@@ -6,7 +6,7 @@ from tags.models import Tag
 from users.models import Subscription, User
 
 
-class UserWithIsSubscribedSerializer(djoser_serializers.UserSerializer):
+class UserSerializer(djoser_serializers.UserSerializer):
     is_subscribed = serializers.SerializerMethodField("get_is_subscribed")
 
     def get_is_subscribed(self, user_object):
@@ -18,7 +18,7 @@ class UserWithIsSubscribedSerializer(djoser_serializers.UserSerializer):
         fields = djoser_serializers.UserSerializer.Meta.fields + ("is_subscribed",)
 
 
-class UserWithRecipesSerializer(UserWithIsSubscribedSerializer):
+class UserWithRecipesSerializer(UserSerializer):
     recipes = serializers.SerializerMethodField("get_recipes")
     recipes_count = serializers.SerializerMethodField("get_recipes_count")
 
@@ -28,8 +28,8 @@ class UserWithRecipesSerializer(UserWithIsSubscribedSerializer):
     def get_recipes_count(self, user_object):
         return 0
 
-    class Meta(UserWithIsSubscribedSerializer.Meta):
-        fields = UserWithIsSubscribedSerializer.Meta.fields + (
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + (
             "recipes",
             "recipes_count",
         )
