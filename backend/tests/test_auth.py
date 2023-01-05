@@ -26,7 +26,7 @@ class TestAuth:
             "password": password_invalid,
             "email": email_invalid,
         }
-        response = client.post(url, data=data_invalid)
+        response = client.post(url, data=data_invalid, format="json")
         code_expected = status.HTTP_400_BAD_REQUEST
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с некорректными параметрами, "

@@ -121,6 +121,11 @@ def tag():
 
 
 @pytest.fixture
+def lunch_tag():
+    return Tag.objects.create(name="Обед", color="#E26CFF", slug="lunch")
+
+
+@pytest.fixture
 def ingredient():
     return Ingredient.objects.create(name="Капуста", measurement_unit="кг")
 

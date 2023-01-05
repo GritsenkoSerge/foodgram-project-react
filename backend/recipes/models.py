@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from ingredients.models import Ingredient
@@ -35,6 +36,9 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField(
         "Время приготовления в минутах",
         help_text="Введите время приготовления в минутах",
+        validators=[
+            MinValueValidator(1, message="Укажите время больше либо равное 1"),
+        ],
     )
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -68,6 +72,9 @@ class Recipe(models.Model):
         default_related_name = "%(class)ss"
         ordering = ("-created",)
 
+    def __str__(self) -> str:
+        return f"{self.id=} {self.author=} {self.name=}"
+
 
 class IngredientInRecipe(models.Model):
     recipe = models.ForeignKey(
@@ -83,7 +90,11 @@ class IngredientInRecipe(models.Model):
         help_text="Выберите ингредиент рецепта",
     )
     amount = models.PositiveIntegerField(
-        "Количество ингридиента", help_text="Введите количество ингридиента"
+        "Количество ингридиента",
+        help_text="Введите количество ингридиента",
+        validators=[
+            MinValueValidator(1, message="Укажите количество больше либо равное 1"),
+        ],
     )
 
     class Meta:

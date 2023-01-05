@@ -61,7 +61,7 @@ class TestUser:
         assert all(
             map(json.get, data.keys())
         ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
-        response = client.post(url, data=data)
+        response = client.post(url, data=data, format="json")
         code_expected = status.HTTP_201_CREATED
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с авторизацией "
@@ -140,7 +140,7 @@ class TestUser:
             f"возвращается код {code_expected}."
         )
         data = {}
-        response = api_client.post(url, data=data)
+        response = api_client.post(url, data=data, format="json")
         code_expected = status.HTTP_400_BAD_REQUEST
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с авторизацией "
@@ -157,7 +157,7 @@ class TestUser:
                 f"возвращается ошибка с указанием поля {field}."
             )
         data = {"new_password": "1234qwer!@#$QWER", "current_password": user_password}
-        response = api_client.post(url, data=data)
+        response = api_client.post(url, data=data, format="json")
         code_expected = status.HTTP_204_NO_CONTENT
         assert response.status_code == code_expected, (
             f"Убедитесь, что при запросе `{url}` с валидными данными, "
