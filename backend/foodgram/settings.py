@@ -7,7 +7,7 @@ SECRET_KEY = "django-insecure-^&wu6w6x8(c15r=u&^493(-iffy@am(+h)po2q&llih%cj5kq%
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -103,7 +103,6 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
-    "LOGOUT_ON_PASSWORD_CHANGE": True,
     "SERIALIZERS": {
         "user": "api.serializers.UserSerializer",
         "current_user": "api.serializers.UserSerializer",

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from ingredients.models import Ingredient
@@ -25,7 +26,7 @@ class Recipe(models.Model):
         "Название", max_length=settings.NAME_MAX_LENGTH, help_text="Введите название"
     )
     image = models.ImageField(
-        "Картинка",
+        "Recipe image",
         upload_to="recipes/",
         help_text="Выберите картинку",
     )
@@ -35,10 +36,13 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField(
         "Время приготовления в минутах",
         help_text="Введите время приготовления в минутах",
+        validators=[
+            MinValueValidator(1, message="Укажите время больше либо равное 1"),
+        ],
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        through="RecipeIngredient",
+        through="IngredientInRecipe",
         verbose_name="Ингредиенты",
         help_text="Выберите ингредиенты",
     )
@@ -66,10 +70,13 @@ class Recipe(models.Model):
         verbose_name = "Рецепт"
         verbose_name_plural = "Рецепты"
         default_related_name = "%(class)ss"
-        ordering = ("created",)
+        ordering = ("-created",)
+
+    def __str__(self) -> str:
+        return f"{self.id=} {self.author=} {self.name=}"
 
 
-class RecipeIngredient(models.Model):
+class IngredientInRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.RESTRICT,
@@ -83,7 +90,11 @@ class RecipeIngredient(models.Model):
         help_text="Выберите ингредиент рецепта",
     )
     amount = models.PositiveIntegerField(
-        "Количество ингридиента", help_text="Введите количество ингридиента"
+        "Количество ингридиента",
+        help_text="Введите количество ингридиента",
+        validators=[
+            MinValueValidator(1, message="Укажите количество больше либо равное 1"),
+        ],
     )
 
     class Meta:

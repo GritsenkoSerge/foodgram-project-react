@@ -12,11 +12,15 @@ class Tag(models.Model):
     # TODO сделать валидатор на цвет
     color = models.CharField(
         "Цвет",
+        unique=True,
         max_length=settings.COLOR_MAX_LENGTH,
         help_text="Введите цвет в HEX (#rrggbb)",
     )
     slug = models.SlugField(
-        "Slug", max_length=settings.SLUG_MAX_LENGTH, help_text="Введите slug"
+        "Slug",
+        unique=True,
+        max_length=settings.SLUG_MAX_LENGTH,
+        help_text="Введите slug",
     )
 
     class Meta:

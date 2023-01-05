@@ -1,3 +1,4 @@
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -7,7 +8,7 @@ from rest_framework.test import APIClient
 
 from foodgram.settings import INSTALLED_APPS
 from ingredients.models import Ingredient
-from recipes.models import Recipe
+from recipes.models import Recipe, IngredientInRecipe
 from tags.models import Tag
 from users.models import Subscription
 
@@ -39,6 +40,13 @@ APPS = ["api", "users", "tags", "ingredients", "recipes"]
 assert all(app in INSTALLED_APPS for app in APPS), (
     f'Зарегистрируйте приложения `{"`, `".join(APPS)}` ' f"в `settings.INSTALLED_APPS`"
 )
+
+
+@pytest.fixture()
+def mock_media(settings):
+    with tempfile.TemporaryDirectory() as temp_directory:
+        settings.MEDIA_ROOT = temp_directory
+        yield temp_directory
 
 
 @pytest.fixture
@@ -113,6 +121,11 @@ def tag():
 
 
 @pytest.fixture
+def lunch_tag():
+    return Tag.objects.create(name="Обед", color="#E26CFF", slug="lunch")
+
+
+@pytest.fixture
 def ingredient():
     return Ingredient.objects.create(name="Капуста", measurement_unit="кг")
 
@@ -120,14 +133,26 @@ def ingredient():
 @pytest.fixture
 def few_ingredients(mixer):
     ingredients = mixer.cycle(10).blend(Ingredient)
-    return ingredients[0]
+    return ingredients[-1]
 
 
 @pytest.fixture
-def recipe(mixer, user):
-    return mixer.blend(Recipe, author=user)
+def recipe(mixer, user, tag):
+    return mixer.blend(Recipe, author=user, tags=[tag.id])
+
+
+@pytest.fixture
+def recipe_ingredient(mixer, recipe, few_ingredients):
+    return mixer.blend(
+        IngredientInRecipe, recipe=recipe, ingredient=few_ingredients, amount=2
+    )
 
 
 @pytest.fixture
 def denied_recipe(mixer, another_user):
     return mixer.blend(Recipe, author=another_user)
+
+
+@pytest.fixture
+def jpg_image():
+    return tempfile.NamedTemporaryFile(suffix=".jpg").name
