@@ -154,5 +154,12 @@ def denied_recipe(mixer, another_user):
 
 
 @pytest.fixture
+def favorite_recipe(denied_recipe, user):
+    instance = denied_recipe
+    instance.favorites.add(user)
+    return instance
+
+
+@pytest.fixture
 def jpg_image():
     return tempfile.NamedTemporaryFile(suffix=".jpg").name
