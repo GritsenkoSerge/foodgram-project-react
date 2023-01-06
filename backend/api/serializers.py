@@ -67,12 +67,8 @@ class UserSerializer(djoser_serializers.UserSerializer):
 
 
 class UserWithRecipesSerializer(UserSerializer):
-    recipes = serializers.SerializerMethodField("get_recipes")
+    recipes = RecipeMinifiedSerializer(many=True)
     recipes_count = serializers.SerializerMethodField("get_recipes_count")
-
-    def get_recipes(self, user_object):
-        # TODO
-        return 1
 
     def get_recipes_count(self, user_object):
         # TODO
@@ -219,8 +215,10 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, recipe):
         user = self.context.get("request").user
-        return user.favorite_recipes.filter(id=recipe.id).exists()
+        if user.is_authenticated:
+            return user.favorite_recipes.filter(id=recipe.id).exists()
 
     def get_is_in_shopping_cart(self, recipe):
         user = self.context.get("request").user
-        return user.cart_recipes.filter(id=recipe.id).exists()
+        if user.is_authenticated:
+            return user.cart_recipes.filter(id=recipe.id).exists()

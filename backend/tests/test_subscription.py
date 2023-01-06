@@ -39,7 +39,9 @@ class TestSubscription:
 
     # get /api/users/subscriptions/ 200
     @pytest.mark.django_db(transaction=True)
-    def test_subscription__authorized_get(self, api_client, subscription):
+    def test_subscription__authorized_get(
+        self, api_client, subscription, denied_recipe
+    ):
         url = self.URL_USERS_SUBSCRIPTIONS
         response = api_client.get(url)
         code_expected = status.HTTP_200_OK
