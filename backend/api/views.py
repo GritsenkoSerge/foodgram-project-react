@@ -10,6 +10,7 @@ from api.permissions import IsAuthorOrReadOnly
 from api.serializers import (
     IngredientSerializer,
     RecipeListSerializer,
+    RecipeMinifiedSerializer,
     RecipeSerializer,
     UserWithRecipesSerializer,
     SubscriptionSerializer,
@@ -144,26 +145,42 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop("partial", False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        if getattr(instance, "_prefetched_objects_cache", None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
-            instance._prefetched_objects_cache = {}
-        # super().update(request, *args, **kwargs)
+        super().update(request, *args, **kwargs)
         serializer = self.serializer_class(
             instance=self.get_object(), context=self.get_serializer_context()
         )
         return Response(serializer.data)
 
-    # def handle_exception(self, exc):
-    #     response = super().handle_exception(exc)
-    #     if response.status_code == status.HTTP_401_UNAUTHORIZED:
-    #         return Response(
-    #             status=status.HTTP_401_UNAUTHORIZED, headers=response.headers
-    #         )
-    #     return response
+
+class FavoriteRecipeViewSet(
+    mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
+    serializer_class = RecipeMinifiedSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get_object(self):
+        return get_object_or_404(Recipe, id=self.kwargs.get("id"))
+
+    def create(self, request, *args, **kwargs):
+        recipe = self.get_object()
+        if recipe.favorites.filter(id=request.user.id).exists():
+            data = {"errors": "Рецепт уже есть в избранном."}
+            return Response(data, status.HTTP_400_BAD_REQUEST)
+        recipe.favorites.add(request.user)
+        recipe.save()
+        serializer = self.serializer_class(
+            instance=self.get_object(), context=self.get_serializer_context()
+        )
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        recipe = self.get_object()
+        favorite_user = recipe.favorites.filter(id=request.user.id)
+        if not favorite_user:
+            data = {"errors": "Рецепта нет в избранном."}
+            return Response(data, status.HTTP_400_BAD_REQUEST)
+        favorite_user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

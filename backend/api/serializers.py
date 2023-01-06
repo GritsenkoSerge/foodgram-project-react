@@ -38,6 +38,20 @@ class Base64ImageField(serializers.ImageField):
         return extension
 
 
+class RecipeMinifiedSerializer(serializers.ModelSerializer):
+    image = Base64ImageField(max_length=None, use_url=True)
+
+    class Meta:
+        model = Recipe
+        fields = (
+            "id",
+            "name",
+            "image",
+            "cooking_time",
+        )
+        read_only_fields = fields
+
+
 class UserSerializer(djoser_serializers.UserSerializer):
     is_subscribed = serializers.SerializerMethodField("get_is_subscribed")
 
@@ -57,9 +71,11 @@ class UserWithRecipesSerializer(UserSerializer):
     recipes_count = serializers.SerializerMethodField("get_recipes_count")
 
     def get_recipes(self, user_object):
+        # TODO
         return 1
 
     def get_recipes_count(self, user_object):
+        # TODO
         return 0
 
     class Meta(UserSerializer.Meta):
@@ -202,9 +218,9 @@ class RecipeListSerializer(serializers.ModelSerializer):
         )
 
     def get_is_favorited(self, recipe):
-        # TODO
-        return True
+        user = self.context.get("request").user
+        return user.favorite_recipes.filter(id=recipe.id).exists()
 
     def get_is_in_shopping_cart(self, recipe):
-        # TODO
-        return True
+        user = self.context.get("request").user
+        return user.cart_recipes.filter(id=recipe.id).exists()
