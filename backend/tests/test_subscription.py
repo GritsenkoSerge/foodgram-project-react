@@ -53,6 +53,19 @@ class TestSubscription:
         assert (
             json.get("count") == 1
         ), f"Убедитесь, что при запросе `{url}`, возвращается одна подписка."
+        results = json.get("results")
+        assert (
+            isinstance(results, list) and len(results) == 1
+        ), f"Убедитесь, что при запросе `{url}`, возвращается одна подписка."
+        assert results.get("recipes_count") == 1, (
+            f"Убедитесь, что при запросе `{url}`, возвращается одна подписка "
+            " с одиним рецептом."
+        )
+        recipes = results.get("recipes")
+        assert isinstance(recipes, list) and len(results) == 1, (
+            f"Убедитесь, что при запросе `{url}`, возвращается одна подписка "
+            " со списокм из одного рецепта."
+        )
 
     # post /api/users/{id}/subscribe/ 401
     @pytest.mark.django_db(transaction=True)
