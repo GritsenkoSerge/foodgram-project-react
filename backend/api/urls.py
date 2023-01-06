@@ -3,6 +3,7 @@ from djoser.views import TokenDestroyView, UserViewSet
 from rest_framework import routers
 
 from .views import (
+    download_shopping_cart,
     FavoriteRecipeViewSet,
     IngredientViewSet,
     RecipeViewSet,
@@ -50,6 +51,9 @@ recipes_patterns = [
         r"<int:id>/shopping_cart/",
         ShoppingCartRecipeViewSet.as_view({"post": "create", "delete": "destroy"}),
         name="shopping-cart",
+    ),
+    path(
+        "download_shopping_cart/", download_shopping_cart, name="download_shopping_cart"
     ),
 ]
 
