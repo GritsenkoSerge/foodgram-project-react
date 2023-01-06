@@ -55,10 +55,11 @@ class Recipe(models.Model):
         blank=True,
         help_text="Выберите пользователей, для добавления в избранное",
     )
-    carts = models.ManyToManyField(
+    shopping_carts = models.ManyToManyField(
         User,
+        through="ShoppingCartRecipe",
         verbose_name="Корзины",
-        related_name="cart_recipes",
+        related_name="shopping_cart_recipes",
         blank=True,
         help_text="Выберите пользователей, для добавления в их корзины",
     )
@@ -78,6 +79,29 @@ class Recipe(models.Model):
 
 
 class FavoriteRecipe(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name="Рецепт",
+        help_text="Выберите рецепт",
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Автор",
+        help_text="Выберите из списка автора",
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                name="unique_Favorite",
+                fields=["recipe", "user"],
+            ),
+        ]
+
+
+class ShoppingCartRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
