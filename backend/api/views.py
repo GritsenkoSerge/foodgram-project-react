@@ -184,3 +184,37 @@ class FavoriteRecipeViewSet(
             return Response(data, status.HTTP_400_BAD_REQUEST)
         favorite_user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ShoppingCartRecipeViewSet(
+    mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
+    serializer_class = RecipeMinifiedSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get_object(self):
+        return get_object_or_404(Recipe, id=self.kwargs.get("id"))
+
+    def create(self, request, *args, **kwargs):
+        recipe = self.get_object()
+        if recipe.shopping_carts.filter(id=request.user.id).exists():
+            data = {"errors": "Рецепт уже есть в корзине."}
+            return Response(data, status.HTTP_400_BAD_REQUEST)
+        recipe.shopping_carts.add(request.user)
+        recipe.save()
+        serializer = self.serializer_class(
+            instance=self.get_object(), context=self.get_serializer_context()
+        )
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        recipe = self.get_object()
+        shopping_cart_user = recipe.shopping_carts.filter(id=request.user.id)
+        if not shopping_cart_user:
+            data = {"errors": "Рецепта нет в корзине."}
+            return Response(data, status.HTTP_400_BAD_REQUEST)
+        shopping_cart_user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

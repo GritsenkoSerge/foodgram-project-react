@@ -221,4 +221,4 @@ class RecipeListSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, recipe):
         user = self.context.get("request").user
         if user.is_authenticated:
-            return user.cart_recipes.filter(id=recipe.id).exists()
+            return user.shopping_cart_recipes.filter(id=recipe.id).exists()

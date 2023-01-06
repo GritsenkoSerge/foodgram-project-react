@@ -6,6 +6,7 @@ from .views import (
     FavoriteRecipeViewSet,
     IngredientViewSet,
     RecipeViewSet,
+    ShoppingCartRecipeViewSet,
     TagViewSet,
     TokenCreateView,
     UserWithRecipesViewSet,
@@ -44,6 +45,11 @@ recipes_patterns = [
         r"<int:id>/favorite/",
         FavoriteRecipeViewSet.as_view({"post": "create", "delete": "destroy"}),
         name="favorite",
+    ),
+    path(
+        r"<int:id>/shopping_cart/",
+        ShoppingCartRecipeViewSet.as_view({"post": "create", "delete": "destroy"}),
+        name="shopping-cart",
     ),
 ]
 
