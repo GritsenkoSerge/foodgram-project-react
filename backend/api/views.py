@@ -3,6 +3,7 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from djoser import views
 from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
@@ -218,3 +219,9 @@ class ShoppingCartRecipeViewSet(
             return Response(data, status.HTTP_400_BAD_REQUEST)
         shopping_cart_user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(["GET"])
+@permission_classes((IsAuthenticatedOrReadOnly,))
+def download_shopping_cart(request):
+    ...
