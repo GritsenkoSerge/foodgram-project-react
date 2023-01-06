@@ -161,5 +161,12 @@ def favorite_recipe(denied_recipe, user):
 
 
 @pytest.fixture
+def shopping_cart_recipe(denied_recipe, user):
+    instance = denied_recipe
+    instance.shopping_carts.add(user)
+    return instance
+
+
+@pytest.fixture
 def jpg_image():
     return tempfile.NamedTemporaryFile(suffix=".jpg").name
