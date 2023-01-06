@@ -11,7 +11,7 @@ class TestRecipe:
         url = self.URL_RECIPES_ID_FAVORITE.format(recipe.id)
         assert not user.favorite_recipes.filter(
             id=recipe.id
-        ).exist(), (
+        ).exists(), (
             "Убедитесь, что перед запросом `{url}`, рецепт не находится в избранном."
         )
         response = api_client.post(url)
@@ -36,7 +36,7 @@ class TestRecipe:
         )
         assert user.favorite_recipes.filter(
             id=recipe.id
-        ).exist(), (
+        ).exists(), (
             f"Убедитесь, что после запроса `{url}`, рецепт находится в избранном."
         )
 
@@ -46,11 +46,11 @@ class TestRecipe:
         url = self.URL_RECIPES_ID_FAVORITE.format(favorite_recipe.id)
         assert user.favorite_recipes.filter(
             id=favorite_recipe.id
-        ).exist(), (
+        ).exists(), (
             f"Убедитесь, что перед запросом `{url}`, рецепт находится в избранном."
         )
         response = api_client.post(url)
-        code_expected = status.HTTP_200_OK
+        code_expected = status.HTTP_400_BAD_REQUEST
         assert (
             response.status_code == code_expected
         ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
@@ -79,7 +79,7 @@ class TestRecipe:
         url = self.URL_RECIPES_ID_FAVORITE.format(favorite_recipe.id)
         assert user.favorite_recipes.filter(
             id=favorite_recipe.id
-        ).exist(), (
+        ).exists(), (
             f"Убедитесь, что перед запросом `{url}`, рецепт находится в избранном."
         )
         response = api_client.delete(url)
@@ -92,7 +92,7 @@ class TestRecipe:
         ), f"Убедитесь, что при запросе `{url}`, возвращается пустой content."
         assert not user.favorite_recipes.filter(
             id=favorite_recipe.id
-        ).exist(), (
+        ).exists(), (
             f"Убедитесь, что при запросе `{url}`, рецепт удаляется из избранного."
         )
 
@@ -102,7 +102,7 @@ class TestRecipe:
         url = self.URL_RECIPES_ID_FAVORITE.format(recipe.id)
         assert not user.favorite_recipes.filter(
             id=recipe.id
-        ).exist(), (
+        ).exists(), (
             "Убедитесь, что перед запросом `{url}`, рецепт не находится в избранном."
         )
         response = api_client.delete(url)

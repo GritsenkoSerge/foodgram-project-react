@@ -1,8 +1,9 @@
 from django.urls import include, path
-from djoser.views import UserViewSet, TokenDestroyView
+from djoser.views import TokenDestroyView, UserViewSet
 from rest_framework import routers
 
 from .views import (
+    FavoriteRecipeViewSet,
     IngredientViewSet,
     RecipeViewSet,
     TagViewSet,
@@ -38,6 +39,14 @@ users_patterns = [
     ),
 ]
 
+recipes_patterns = [
+    path(
+        r"<int:id>/favorite/",
+        FavoriteRecipeViewSet.as_view({"post": "create", "delete": "destroy"}),
+        name="favorite",
+    ),
+]
+
 router = routers.DefaultRouter()
 router.register(r"tags", TagViewSet, basename="tags")
 router.register(r"ingredients", IngredientViewSet, basename="ingredients")
@@ -47,4 +56,5 @@ urlpatterns = [
     path(r"", include(router.urls)),
     path(r"auth/", include(auth_patterns)),
     path(r"users/", include(users_patterns)),
+    path(r"recipes/", include(recipes_patterns)),
 ]
