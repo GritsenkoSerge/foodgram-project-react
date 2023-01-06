@@ -27,7 +27,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = (
         "author",
         "favorites",
-        "carts",
+        "shopping_carts",
     )
     empty_value_display = settings.ADMIN_MODEL_EMPTY_VALUE
 
