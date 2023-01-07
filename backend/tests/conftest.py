@@ -149,8 +149,13 @@ def recipe_ingredient(mixer, recipe, few_ingredients):
 
 
 @pytest.fixture
-def denied_recipe(mixer, another_user):
-    return mixer.blend(Recipe, author=another_user)
+def denied_recipe(mixer, another_user, ingredient, few_ingredients):
+    instance = mixer.blend(Recipe, author=another_user)
+    mixer.blend(IngredientInRecipe, recipe=instance, ingredient=ingredient, amount=1)
+    mixer.blend(
+        IngredientInRecipe, recipe=instance, ingredient=few_ingredients, amount=3
+    )
+    return instance
 
 
 @pytest.fixture
@@ -163,6 +168,13 @@ def favorite_recipe(denied_recipe, user):
 @pytest.fixture
 def shopping_cart_recipe(denied_recipe, user):
     instance = denied_recipe
+    instance.shopping_carts.add(user)
+    return instance
+
+
+@pytest.fixture
+def one_more_shopping_cart_recipe(recipe, user, recipe_ingredient):
+    instance = recipe
     instance.shopping_carts.add(user)
     return instance
 

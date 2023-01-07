@@ -137,10 +137,10 @@ class TestRecipe:
     # get /api/recipes/download_shopping_cart/ 200
     @pytest.mark.django_db(transaction=True)
     def test_recipes_download_shopping_cart__get_valid(
-        self, api_client, shopping_cart_recipe
+        self, api_client, shopping_cart_recipe, one_more_shopping_cart_recipe
     ):
         url = self.URL_RECIPES_DOWNLOAD_SHOPPING_CART
-        response = api_client.post(url)
+        response = api_client.get(url)
         code_expected = status.HTTP_200_OK
         assert (
             response.status_code == code_expected
@@ -150,8 +150,11 @@ class TestRecipe:
             "text/plain",
         )
         assert (
-            response.schema in schemas
-        ), f"Убедитесь, что при запросе `{url}`, в ответе одна из схем {schemas}."
+            response.get("Content-Type") in schemas
+        ), f"Убедитесь, что при запросе `{url}`, в заголовке ответа из схем {schemas}."
+        assert (
+            response.content
+        ), f"Убедитесь, что при запросе `{url}`, в ответе есть content."
 
     # get /api/recipes/download_shopping_cart/ 401
     @pytest.mark.django_db(transaction=True)
@@ -159,7 +162,7 @@ class TestRecipe:
         self, client, shopping_cart_recipe
     ):
         url = self.URL_RECIPES_DOWNLOAD_SHOPPING_CART
-        response = client.delete(url)
+        response = client.get(url)
         code_expected = status.HTTP_401_UNAUTHORIZED
         assert (
             response.status_code == code_expected

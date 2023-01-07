@@ -1,9 +1,13 @@
+import pdfkit
+from datetime import datetime
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.http import Http404, JsonResponse
+from django.db.models import Sum
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
 from djoser import views
 from rest_framework import mixins, status, viewsets
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
@@ -13,12 +17,12 @@ from api.serializers import (
     RecipeListSerializer,
     RecipeMinifiedSerializer,
     RecipeSerializer,
-    UserWithRecipesSerializer,
     SubscriptionSerializer,
     TagSerializer,
+    UserWithRecipesSerializer,
 )
 from ingredients.models import Ingredient
-from recipes.models import Recipe
+from recipes.models import IngredientInRecipe, Recipe
 from tags.models import Tag
 from users.models import Subscription, User
 
@@ -152,6 +156,32 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         return Response(serializer.data)
 
+    @action(permission_classes=((IsAuthenticated,)), detail=False)
+    def download_shopping_cart(self, request):
+        page_objects = (
+            IngredientInRecipe.objects.filter(
+                recipe__in=request.user.shopping_cart_recipes.all()
+            )
+            .values("ingredient__name", "ingredient__measurement_unit")
+            .annotate(Sum("amount"))
+            .order_by("ingredient__name")
+        )
+
+        data = {
+            "page_objects": page_objects,
+            "user": request.user,
+            "created": datetime.now(),
+        }
+
+        template = get_template("shopping_cart.html")
+        html = template.render(data)
+        pdf = pdfkit.from_string(html, False, options={"encoding": "UTF-8"})
+
+        filename = "shopping_cart.pdf"
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
 
 class FavoriteRecipeViewSet(
     mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
@@ -219,9 +249,3 @@ class ShoppingCartRecipeViewSet(
             return Response(data, status.HTTP_400_BAD_REQUEST)
         shopping_cart_user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-@api_view(["GET"])
-@permission_classes((IsAuthenticatedOrReadOnly,))
-def download_shopping_cart(request):
-    ...
