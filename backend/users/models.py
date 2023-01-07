@@ -5,6 +5,9 @@ from django.db import models
 
 
 class User(AbstractUser):
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username", "first_name", "last_name"]
+
     username = models.CharField(
         "Имя пользователя",
         max_length=settings.USERNAME_MAX_LENGTH,
@@ -35,12 +38,6 @@ class User(AbstractUser):
         "Фамилия", max_length=settings.LAST_NAME_MAX_LENGTH, help_text="Введите фамилию"
     )
 
-    def get_name(self):
-        return self.get_full_name() or self.get_username()
-
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username", "first_name", "last_name"]
-
     class Meta:
         db_table = "auth_user"
         verbose_name = "Пользователь"
@@ -48,6 +45,9 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return self.get_name()
+
+    def get_name(self):
+        return self.get_full_name() or self.get_username()
 
 
 class Subscription(models.Model):
