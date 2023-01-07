@@ -34,7 +34,7 @@ class TestRecipe:
         "ingredients": (models.ManyToManyField, Ingredient),
         "tags": (models.ManyToManyField, Tag),
         "favorites": (models.ManyToManyField, User),
-        "carts": (models.ManyToManyField, User),
+        "shopping_carts": (models.ManyToManyField, User),
     }
     URL_RECIPES = "/api/recipes/"
     URL_RECIPES_ID = "/api/recipes/{}/"

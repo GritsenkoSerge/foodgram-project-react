@@ -8,26 +8,21 @@ from .models import Recipe, IngredientInRecipe
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
-        "author",
         "name",
-        "image",
-        "text",
-        "cooking_time",
-        "favorite_amount",
+        "author",
     )
     list_editable = (
-        "author",
         "name",
+        "author",
     )
     search_fields = (
         "author",
         "name",
-        "text",
     )
     list_filter = (
         "author",
+        "name",
         "favorites",
-        "shopping_carts",
     )
     empty_value_display = settings.ADMIN_MODEL_EMPTY_VALUE
 

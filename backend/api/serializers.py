@@ -71,8 +71,7 @@ class UserWithRecipesSerializer(UserSerializer):
     recipes_count = serializers.SerializerMethodField("get_recipes_count")
 
     def get_recipes_count(self, user_object):
-        # TODO
-        return 0
+        return user_object.recipes.count()
 
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields + (
@@ -208,7 +207,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         exclude = (
-            "carts",
+            "shopping_carts",
             "created",
             "favorites",
         )

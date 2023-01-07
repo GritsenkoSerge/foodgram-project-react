@@ -26,7 +26,7 @@ class Recipe(models.Model):
         "Название", max_length=settings.NAME_MAX_LENGTH, help_text="Введите название"
     )
     image = models.ImageField(
-        "Recipe image",
+        "Картинка",
         upload_to="recipes/",
         help_text="Выберите картинку",
     )
@@ -66,6 +66,7 @@ class Recipe(models.Model):
 
     @admin.display(description="Число добавлений в избранное")
     def favorite_amount(self):
+        """Число добавлений рецепта в избранное для вывода в админке."""
         return self.favorites.count()
 
     class Meta:
@@ -148,3 +149,6 @@ class IngredientInRecipe(models.Model):
     class Meta:
         verbose_name = "Ингредиент рецепта"
         verbose_name_plural = "Ингредиенты рецептов"
+
+    def __str__(self) -> str:
+        return f"{self.ingredient} — {self.amount}"
