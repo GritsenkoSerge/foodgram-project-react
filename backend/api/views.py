@@ -75,13 +75,11 @@ class UserWithRecipesViewSet(
 
     def create(self, request, *args, **kwargs):
         request.data.update(author=self.get_author())
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
+        super().create(request, *args, **kwargs)
         serializer = self.serializer_class(
             instance=self.get_author(), context=self.get_serializer_context()
         )
+        headers = self.get_success_headers(serializer.data)
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )

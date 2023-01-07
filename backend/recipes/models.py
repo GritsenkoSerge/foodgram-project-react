@@ -64,11 +64,6 @@ class Recipe(models.Model):
         help_text="Выберите пользователей, для добавления в их корзины",
     )
 
-    @admin.display(description="Число добавлений в избранное")
-    def favorite_amount(self):
-        """Число добавлений рецепта в избранное для вывода в админке."""
-        return self.favorites.count()
-
     class Meta:
         verbose_name = "Рецепт"
         verbose_name_plural = "Рецепты"
@@ -77,6 +72,11 @@ class Recipe(models.Model):
 
     def __str__(self) -> str:
         return f"{self.id=} {self.author=} {self.name=}"
+
+    @admin.display(description="Число добавлений в избранное")
+    def favorite_amount(self):
+        """Число добавлений рецепта в избранное для вывода в админке."""
+        return self.favorites.count()
 
 
 class FavoriteRecipe(models.Model):

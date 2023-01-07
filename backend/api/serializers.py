@@ -53,7 +53,7 @@ class RecipeMinifiedSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(djoser_serializers.UserSerializer):
-    is_subscribed = serializers.SerializerMethodField("get_is_subscribed")
+    is_subscribed = serializers.SerializerMethodField()
 
     def get_is_subscribed(self, user_object):
         user = self.context["request"].user
@@ -67,11 +67,8 @@ class UserSerializer(djoser_serializers.UserSerializer):
 
 
 class UserWithRecipesSerializer(UserSerializer):
-    recipes = RecipeMinifiedSerializer(many=True)
-    recipes_count = serializers.SerializerMethodField("get_recipes_count")
-
-    def get_recipes_count(self, user_object):
-        return user_object.recipes.count()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields + (
@@ -79,6 +76,20 @@ class UserWithRecipesSerializer(UserSerializer):
             "recipes_count",
         )
         read_only_fields = fields
+
+    def get_recipes(self, user_object):
+        queryset = user_object.recipes.all()
+        recipes_limit = self.context["request"].query_params.get("recipes_limit")
+        if recipes_limit is not None:
+            try:
+                recipes_limit = int(recipes_limit)
+                queryset = queryset[:recipes_limit]
+            except (TypeError, ValueError):
+                pass
+        return RecipeMinifiedSerializer(queryset, many=True).data
+
+    def get_recipes_count(self, user_object):
+        return user_object.recipes.count()
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -201,8 +212,8 @@ class RecipeListSerializer(serializers.ModelSerializer):
         source="ingredientinrecipe_set", many=True
     )
     tags = TagSerializer(many=True)
-    is_favorited = serializers.SerializerMethodField("get_is_favorited")
-    is_in_shopping_cart = serializers.SerializerMethodField("get_is_in_shopping_cart")
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe

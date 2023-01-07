@@ -40,7 +40,7 @@ class TestSubscription:
     # get /api/users/subscriptions/ 200
     @pytest.mark.django_db(transaction=True)
     def test_subscription__authorized_get(
-        self, api_client, subscription, denied_recipe
+        self, api_client, subscription, denied_recipe, one_more_denied_recipe
     ):
         url = self.URL_USERS_SUBSCRIPTIONS
         response = api_client.get(url)
@@ -57,10 +57,27 @@ class TestSubscription:
         assert (
             isinstance(results, list) and len(results) == 1
         ), f"Убедитесь, что при запросе `{url}`, возвращается одна подписка."
-        assert results[0].get("recipes_count") == 1, (
+        assert results[0].get("recipes_count") == 2, (
             f"Убедитесь, что при запросе `{url}`, возвращается одна подписка "
-            " с одиним рецептом."
+            " с двумя рецептами."
         )
+        recipes = results[0].get("recipes")
+        assert isinstance(recipes, list) and len(recipes) == 2, (
+            f"Убедитесь, что при запросе `{url}`, возвращается одна подписка "
+            " со списокм из двух рецептов."
+        )
+        url = self.URL_USERS_SUBSCRIPTIONS + "?recipes_limit=1"
+        response = api_client.get(url)
+        code_expected = status.HTTP_200_OK
+        assert response.status_code == code_expected, (
+            f"Убедитесь, что при запросе `{url}` с имеющейся авторизацией, "
+            f"возвращается код {code_expected}."
+        )
+        json = response.json()
+        results = json.get("results")
+        assert (
+            isinstance(results, list) and len(results) == 1
+        ), f"Убедитесь, что при запросе `{url}`, возвращается одна подписка."
         recipes = results[0].get("recipes")
         assert isinstance(recipes, list) and len(recipes) == 1, (
             f"Убедитесь, что при запросе `{url}`, возвращается одна подписка "
