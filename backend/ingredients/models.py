@@ -5,7 +5,6 @@ from django.db import models
 class Ingredient(models.Model):
     name = models.CharField(
         "Название",
-        unique=True,
         max_length=settings.NAME_MAX_LENGTH,
         help_text="Введите название",
     )
@@ -18,6 +17,12 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = "Ингредиент"
         verbose_name_plural = "Ингредиенты"
+        constraints = [
+            models.UniqueConstraint(
+                name="unique_ingridient",
+                fields=["name", "measurement_unit"],
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"{self.name} ({self.measurement_unit})"
