@@ -2,6 +2,7 @@ import pdfkit
 from datetime import datetime
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.db.models import Sum
+from django.db.models.query_utils import Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
@@ -104,7 +105,11 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = Ingredient.objects.all()
         name = self.request.query_params.get("name")
         if name is not None:
-            queryset = queryset.filter(name__startswith=name)
+            qs_starts = queryset.filter(name__istartswith=name)
+            qs_contains = queryset.filter(
+                ~Q(name__istartswith=name) & Q(name__icontains=name)
+            )
+            queryset = list(qs_starts) + list(qs_contains)
         return queryset
 
 
