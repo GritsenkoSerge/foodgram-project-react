@@ -46,11 +46,11 @@ class TestIngredient:
             f"Убедитесь, что при запросе `{url}`, "
             f"возвращается ингредиент с полями {fields}"
         )
-        startswith = few_ingredients.name[:1]
-        url = self.URL_INGREDIENTS + f"?name={startswith}"
+        contains = few_ingredients.name[:2]
+        url = self.URL_INGREDIENTS + f"?name={contains}"
         response = client.get(url)
         code_expected = status.HTTP_200_OK
-        amount = Ingredient.objects.filter(name__startswith=startswith).count()
+        amount = Ingredient.objects.filter(name__icontains=contains).count()
         json = response.json()
         assert (
             len(json) == amount
