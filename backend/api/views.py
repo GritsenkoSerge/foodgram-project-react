@@ -23,7 +23,7 @@ from api.serializers import (
     UserWithRecipesSerializer,
 )
 from ingredients.models import Ingredient
-from recipes.models import IngredientInRecipe, Recipe
+from recipes.models import IngredientInRecipe, Recipe, TagRecipe
 from tags.models import Tag
 from users.models import Subscription, User
 
@@ -121,13 +121,31 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Recipe.objects.all()
-        # TODO
-        # is_favorited = self.request.query_params.get("is_favorited")
-        # is_in_shopping_cart = self.request.query_params.get("is_in_shopping_cart")
-        # author = self.request.query_params.get("author")
-        # tags = self.request.query_params.get("tags")
-        # if name is not None:
-        #     queryset = queryset.filter(name__startswith=name)
+        user = self.request.user
+        is_favorited = self.request.query_params.get("is_favorited")
+        if is_favorited:
+            if user.is_authenticated:
+                recipes_id = user.favorite_recipes.values("id")
+            else:
+                recipes_id = []
+            q = Q(id__in=recipes_id)
+            queryset = queryset.filter(q if is_favorited == "1" else ~q).all()
+        is_in_shopping_cart = self.request.query_params.get("is_in_shopping_cart")
+        if is_in_shopping_cart:
+            if user.is_authenticated:
+                recipes_id = user.shopping_cart_recipes.values("id")
+            else:
+                recipes_id = []
+            q = Q(id__in=recipes_id)
+            queryset = queryset.filter(q if is_in_shopping_cart == "1" else ~q).all()
+        author_id = self.request.query_params.get("author")
+        if author_id:
+            queryset = queryset.filter(author__id=author_id).all()
+        tags = self.request.query_params.getlist("tags")
+        if tags:
+            tags = Tag.objects.filter(slug__in=tags).all()
+            for tag in tags:
+                queryset = queryset.filter(tags__in=[tag])
         return queryset
 
     def create(self, request, *args, **kwargs):

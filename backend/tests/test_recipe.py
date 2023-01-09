@@ -42,7 +42,6 @@ class TestRecipe:
     def test_recipe_model(self):
         check_model_field_names(self.MODEL, self.MODEL_FIELDS)
 
-    # get /api/recipes/ 200
     @pytest.mark.django_db(transaction=True)
     def test_recipe__get_valid(self, client, recipe, recipe_ingredient):
         url = self.URL_RECIPES
@@ -76,20 +75,57 @@ class TestRecipe:
             f"Убедитесь, что при запросе `{url}`, "
             f"возвращаются рецепты с полями {fields}"
         )
-        # фильтр по is_favorited (0/1), is_in_shopping_cart (0/1),
-        # author (id), tags (slug)
-        # assert False, "ToDo is_favorited"
-        # url = self.URL_RECIPES + "?is_favorited=1"
-        # response = client.get(url)
-        # code_expected = status.HTTP_200_OK
-        # amount = Recipe.objects.filter(is_favorited=True).count()
-        # json = response.json()
-        # assert (
-        #     json.get("count") == amount
-        # ), f"Убедитесь, что при запросе `{url}`, рецепты фильтруются по избранным."
-        # assert False, "ToDo is_in_shopping_cart"
-        # assert False, "ToDo author"
-        # assert False, "ToDo tags"
+
+    @pytest.mark.django_db(transaction=True)
+    def test_recipe__get_by_filter(
+        self, client, user, recipe, recipe_ingredient, denied_recipe, tag, lunch_tag
+    ):
+        url = self.URL_RECIPES + "?is_favorited=1"
+        response = client.get(url, format="json")
+        code_expected = status.HTTP_200_OK
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        amount = 0
+        json = response.json()
+        assert (
+            json.get("count") == amount
+        ), f"Убедитесь, что при запросе `{url}`, рецепты фильтруются по избранным."
+        url = self.URL_RECIPES + "?is_in_shopping_cart=1"
+        response = client.get(url, format="json")
+        code_expected = status.HTTP_200_OK
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        amount = 0
+        json = response.json()
+        assert json.get("count") == amount, (
+            f"Убедитесь, что при запросе `{url}`, "
+            "рецепты фильтруются по наличию в корзине."
+        )
+        url = self.URL_RECIPES + f"?author={user.id}"
+        response = client.get(url, format="json")
+        code_expected = status.HTTP_200_OK
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        amount = Recipe.objects.filter(author=user).count()
+        json = response.json()
+        assert json.get("count") == amount, (
+            f"Убедитесь, что при запросе `{url}`, "
+            f"рецепты фильтруются по автору `{user.get_name()}`."
+        )
+        url = self.URL_RECIPES + f"?tags={tag.slug}&tags={lunch_tag.slug}"
+        response = client.get(url, format="json")
+        code_expected = status.HTTP_200_OK
+        assert (
+            response.status_code == code_expected
+        ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
+        amount = 1
+        json = response.json()
+        assert (
+            json.get("count") == amount
+        ), f"Убедитесь, что при запросе `{url}`, рецепты фильтруются по тегам."
 
     # post /api/recipes/ 201
     @pytest.mark.django_db(transaction=True)

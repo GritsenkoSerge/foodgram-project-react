@@ -46,7 +46,9 @@ class Recipe(models.Model):
         verbose_name="Ингредиенты",
         help_text="Выберите ингредиенты",
     )
-    tags = models.ManyToManyField(Tag, verbose_name="Теги", help_text="Выберите теги")
+    tags = models.ManyToManyField(
+        Tag, through="TagRecipe", verbose_name="Теги", help_text="Выберите теги"
+    )
     favorites = models.ManyToManyField(
         User,
         through="FavoriteRecipe",
@@ -77,6 +79,29 @@ class Recipe(models.Model):
     def favorite_amount(self):
         """Число добавлений рецепта в избранное для вывода в админке."""
         return self.favorites.count()
+
+
+class TagRecipe(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name="Рецепт",
+        help_text="Выберите рецепт",
+    )
+    tag = models.ForeignKey(
+        Tag,
+        on_delete=models.RESTRICT,
+        verbose_name="Тег",
+        help_text="Выберите из списка тег",
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                name="unique_recipe_tag",
+                fields=["recipe", "tag"],
+            ),
+        ]
 
 
 class FavoriteRecipe(models.Model):

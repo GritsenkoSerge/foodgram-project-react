@@ -8,7 +8,7 @@ from rest_framework.test import APIClient
 
 from foodgram.settings import INSTALLED_APPS
 from ingredients.models import Ingredient
-from recipes.models import Recipe, IngredientInRecipe
+from recipes.models import Recipe, IngredientInRecipe, TagRecipe
 from tags.models import Tag
 from users.models import Subscription
 
@@ -126,6 +126,11 @@ def lunch_tag():
 
 
 @pytest.fixture
+def dinner_tag():
+    return Tag.objects.create(name="Ужин", color="#FF6CFF", slug="dinner")
+
+
+@pytest.fixture
 def ingredient():
     return Ingredient.objects.create(name="Капуста", measurement_unit="кг")
 
@@ -137,8 +142,11 @@ def few_ingredients(mixer):
 
 
 @pytest.fixture
-def recipe(mixer, user, tag):
-    return mixer.blend(Recipe, author=user, tags=[tag.id])
+def recipe(mixer, user, tag, lunch_tag):
+    instance = mixer.blend(Recipe, author=user)
+    mixer.blend(TagRecipe, recipe=instance, tag=tag)
+    mixer.blend(TagRecipe, recipe=instance, tag=lunch_tag)
+    return instance
 
 
 @pytest.fixture
@@ -149,12 +157,16 @@ def recipe_ingredient(mixer, recipe, few_ingredients):
 
 
 @pytest.fixture
-def denied_recipe(mixer, another_user, ingredient, few_ingredients):
+def denied_recipe(
+    mixer, another_user, ingredient, few_ingredients, dinner_tag, lunch_tag
+):
     instance = mixer.blend(Recipe, author=another_user)
     mixer.blend(IngredientInRecipe, recipe=instance, ingredient=ingredient, amount=1)
     mixer.blend(
         IngredientInRecipe, recipe=instance, ingredient=few_ingredients, amount=3
     )
+    mixer.blend(TagRecipe, recipe=instance, tag=dinner_tag)
+    mixer.blend(TagRecipe, recipe=instance, tag=lunch_tag)
     return instance
 
 
