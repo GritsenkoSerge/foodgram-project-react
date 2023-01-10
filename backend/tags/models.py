@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core import validators
 from django.db import models
 
 
@@ -9,12 +10,17 @@ class Tag(models.Model):
         max_length=settings.NAME_MAX_LENGTH,
         help_text="Введите название",
     )
-    # TODO сделать валидатор на цвет
     color = models.CharField(
         "Цвет",
         unique=True,
         max_length=settings.COLOR_MAX_LENGTH,
-        help_text="Введите цвет в HEX (#rrggbb)",
+        help_text="Введите цвет в RGB-формате (#rrggbb)",
+        validators=[
+            validators.RegexValidator(
+                r"^#[a-fA-F0-9]{6}$",
+                "Используйте RGB-формат для указания цвета (#AABBCC)",
+            )
+        ],
     )
     slug = models.SlugField(
         "Slug",
