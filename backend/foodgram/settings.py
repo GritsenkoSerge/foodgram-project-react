@@ -125,6 +125,9 @@ DJOSER = {
         "user": "api.serializers.UserSerializer",
         "current_user": "api.serializers.UserSerializer",
     },
+    "PERMISSIONS": {
+        "user": ["rest_framework.permissions.AllowAny"],
+    },
 }
 
 STATIC_URL = "static/"
