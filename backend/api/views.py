@@ -23,7 +23,13 @@ from api.serializers import (
     UserWithRecipesSerializer,
 )
 from ingredients.models import Ingredient
-from recipes.models import IngredientInRecipe, Recipe, TagRecipe
+from recipes.models import (
+    IngredientInRecipe,
+    FavoriteRecipe,
+    Recipe,
+    TagRecipe,
+    ShoppingCartRecipe,
+)
 from tags.models import Tag
 from users.models import Subscription, User
 
@@ -144,8 +150,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         tags = self.request.query_params.getlist("tags")
         if tags:
             tags = Tag.objects.filter(slug__in=tags).all()
-            for tag in tags:
-                queryset = queryset.filter(tags__in=[tag])
+            recipes_id = (
+                TagRecipe.objects.filter(tag__in=tags).values("recipe__id").distinct()
+            )
+            queryset = queryset.filter(id__in=recipes_id)
         return queryset
 
     def create(self, request, *args, **kwargs):
@@ -234,7 +242,9 @@ class FavoriteRecipeViewSet(
         if not favorite_user:
             data = {"errors": "Рецепта нет в избранном."}
             return Response(data, status.HTTP_400_BAD_REQUEST)
-        favorite_user.delete()
+        FavoriteRecipe.objects.get(
+            recipe_id=recipe.id, user_id=request.user.id
+        ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -268,5 +278,7 @@ class ShoppingCartRecipeViewSet(
         if not shopping_cart_user:
             data = {"errors": "Рецепта нет в корзине."}
             return Response(data, status.HTTP_400_BAD_REQUEST)
-        shopping_cart_user.delete()
+        ShoppingCartRecipe.objects.get(
+            recipe_id=recipe.id, user_id=request.user.id
+        ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
