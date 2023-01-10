@@ -1,13 +1,20 @@
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-^&wu6w6x8(c15r=u&^493(-iffy@am(+h)po2q&llih%cj5kq%",
+)
 
-SECRET_KEY = "django-insecure-^&wu6w6x8(c15r=u&^493(-iffy@am(+h)po2q&llih%cj5kq%"
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-DEBUG = True
-
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split()
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -58,11 +65,22 @@ TEMPLATES = [
 WSGI_APPLICATION = "foodgram.wsgi.application"
 
 DATABASES = {
-    "default": {
+    "postgres": {
+        "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.postgresql"),
+        "NAME": os.getenv("DB_NAME", "postgres"),
+        "USER": os.getenv("POSTGRES_USER", "postgres"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "postgres"),
+        "HOST": os.getenv("DB_HOST", "db"),
+        "PORT": os.getenv("DB_PORT", "5432"),
+    },
+    "sqlite3": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-    }
+    },
 }
+DATABASES["default"] = DATABASES[
+    "sqlite3" if os.getenv("USE_SQLITE", "False") == "True" else "postgres"
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -97,7 +115,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 100,
+    "PAGE_SIZE": 6,
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "NON_FIELD_ERRORS_KEY": "errors",
 }
@@ -108,10 +126,6 @@ DJOSER = {
         "current_user": "api.serializers.UserSerializer",
     },
 }
-
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-
-EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "static"
@@ -133,5 +147,3 @@ NAME_MAX_LENGTH = 200
 MEASUREMENT_UNIT_MAX_LENGTH = 200
 SLUG_MAX_LENGTH = 200
 COLOR_MAX_LENGTH = 7
-
-CONFIRMATION_CODE_MAX_LENGTH = 24

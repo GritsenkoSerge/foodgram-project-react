@@ -18,7 +18,7 @@ class Recipe(models.Model):
     )
     author = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
+        on_delete=models.RESTRICT,
         verbose_name="Автор",
         help_text="Выберите из списка автора",
     )
