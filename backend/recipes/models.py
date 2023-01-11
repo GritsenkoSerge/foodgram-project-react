@@ -102,6 +102,8 @@ class TagRecipe(models.Model):
                 fields=["recipe", "tag"],
             ),
         ]
+        verbose_name = "Тег рецепта"
+        verbose_name_plural = "Теги рецептов"
 
 
 class FavoriteRecipe(models.Model):
@@ -114,8 +116,8 @@ class FavoriteRecipe(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name="Автор",
-        help_text="Выберите из списка автора",
+        verbose_name="Пользователь",
+        help_text="Выберите из списка пользователя",
     )
 
     class Meta:
@@ -125,6 +127,8 @@ class FavoriteRecipe(models.Model):
                 fields=["recipe", "user"],
             ),
         ]
+        verbose_name = "Любимый рецепт"
+        verbose_name_plural = "Любимые рецепты"
 
 
 class ShoppingCartRecipe(models.Model):
@@ -137,8 +141,8 @@ class ShoppingCartRecipe(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name="Автор",
-        help_text="Выберите из списка автора",
+        verbose_name="Пользователь",
+        help_text="Выберите из списка пользователя",
     )
 
     class Meta:
@@ -148,6 +152,8 @@ class ShoppingCartRecipe(models.Model):
                 fields=["recipe", "user"],
             ),
         ]
+        verbose_name = "Рецепт в корзине пользователя"
+        verbose_name_plural = "Рецепты в корзинах пользователей"
 
 
 class IngredientInRecipe(models.Model):

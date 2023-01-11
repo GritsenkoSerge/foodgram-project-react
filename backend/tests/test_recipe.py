@@ -121,7 +121,7 @@ class TestRecipe:
         assert (
             response.status_code == code_expected
         ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
-        amount = 1
+        amount = 2
         json = response.json()
         assert (
             json.get("count") == amount
