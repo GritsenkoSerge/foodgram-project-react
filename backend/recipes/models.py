@@ -73,7 +73,7 @@ class Recipe(models.Model):
         ordering = ("-created",)
 
     def __str__(self) -> str:
-        return f"{self.id=} {self.author=} {self.name=}"
+        return f"id: {self.id} Автор: {str(self.author)} Название: {self.name}"
 
     @admin.display(description="Число добавлений в избранное")
     def favorite_amount(self):
