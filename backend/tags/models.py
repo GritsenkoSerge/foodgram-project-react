@@ -33,3 +33,6 @@ class Tag(models.Model):
         ordering = ("name",)
         verbose_name = "Тег"
         verbose_name_plural = "Теги"
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.slug})"
