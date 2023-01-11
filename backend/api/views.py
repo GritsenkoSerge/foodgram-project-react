@@ -37,6 +37,7 @@ from users.models import Subscription, User
 class TokenCreateView(views.TokenCreateView):
     def _action(self, serializer):
         response = super()._action(serializer)
+        # По ТЗ нужен ответ 201, в то время как Djoser возвращает 200
         if response.status_code == status.HTTP_200_OK:
             response.status_code = status.HTTP_201_CREATED
         return response
@@ -115,15 +116,24 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
             qs_contains = queryset.filter(
                 ~Q(name__istartswith=name) & Q(name__icontains=name)
             )
+            # преобразуем в list, чтобы результирующий queryset
+            # имел первоначальную сортировку
             queryset = list(qs_starts) + list(qs_contains)
         return queryset
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeListSerializer
-    create_serializer_class = RecipeSerializer
-    partial_update_serializer_class = RecipeSerializer
+    edit_serializer_class = RecipeSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly)
+
+    def get_serializer_class(self):
+        if self.action in (
+            "create",
+            "partial_update",
+        ):
+            return self.edit_serializer_class
+        return super().get_serializer_class()
 
     def get_queryset(self):
         queryset = Recipe.objects.all()
@@ -134,16 +144,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 recipes_id = user.favorite_recipes.values("id")
             else:
                 recipes_id = []
-            q = Q(id__in=recipes_id)
-            queryset = queryset.filter(q if is_favorited == "1" else ~q).all()
+            condition = Q(id__in=recipes_id)
+            queryset = queryset.filter(
+                condition if is_favorited == "1" else ~condition
+            ).all()
         is_in_shopping_cart = self.request.query_params.get("is_in_shopping_cart")
         if is_in_shopping_cart:
             if user.is_authenticated:
                 recipes_id = user.shopping_cart_recipes.values("id")
             else:
                 recipes_id = []
-            q = Q(id__in=recipes_id)
-            queryset = queryset.filter(q if is_in_shopping_cart == "1" else ~q).all()
+            condition = Q(id__in=recipes_id)
+            queryset = queryset.filter(
+                condition if is_in_shopping_cart == "1" else ~condition
+            ).all()
         author_id = self.request.query_params.get("author")
         if author_id:
             queryset = queryset.filter(author__id=author_id).all()
@@ -161,6 +175,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         recipe = self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
+        # после создания возвращаем основной сериализатор
         serializer = self.serializer_class(
             instance=recipe, context=self.get_serializer_context()
         )
@@ -171,15 +186,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         return serializer.save(author=self.request.user)
 
-    def get_serializer_class(self):
-        if self.action == "create":
-            return self.create_serializer_class
-        if self.action == "partial_update":
-            return self.partial_update_serializer_class
-        return super().get_serializer_class()
-
     def update(self, request, *args, **kwargs):
         super().update(request, *args, **kwargs)
+        # после изменения возвращаем основной сериализатор
         serializer = self.serializer_class(
             instance=self.get_object(), context=self.get_serializer_context()
         )
