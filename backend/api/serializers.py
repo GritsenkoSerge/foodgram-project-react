@@ -3,7 +3,6 @@ import binascii
 import imghdr
 import uuid
 
-import six
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from djoser import serializers as djoser_serializers
@@ -17,14 +16,15 @@ from users.models import Subscription, User
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
-        if isinstance(data, six.string_types):
+        if isinstance(data, str):
             if "data:" in data and ";base64," in data:
                 _, data = data.split(";base64,")
             try:
                 decoded_file = base64.b64decode(data)
-            except TypeError:
-                self.fail("invalid_image")
-            except binascii.Error:
+            except (
+                TypeError,
+                binascii.Error,
+            ):
                 self.fail("invalid_image")
             file_name = str(uuid.uuid4())[:12]
             file_extension = self.get_file_extension(file_name, decoded_file)

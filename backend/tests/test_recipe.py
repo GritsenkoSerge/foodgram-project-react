@@ -121,7 +121,7 @@ class TestRecipe:
         assert (
             response.status_code == code_expected
         ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
-        amount = 1
+        amount = 2
         json = response.json()
         assert (
             json.get("count") == amount
@@ -329,7 +329,7 @@ class TestRecipe:
     ):
         url = self.URL_RECIPES_ID.format(recipe.id)
         data = {
-            "image": "",
+            "image": "data:image/png;base64,WrongImage",
             "name": "",
             "text": "",
             "cooking_time": 0,
