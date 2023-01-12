@@ -24,7 +24,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django_filters",
     "rest_framework",
     "rest_framework.authtoken",
     "djoser",
@@ -36,8 +35,11 @@ INSTALLED_APPS = [
     "debug_toolbar",
 ]
 
+DEBUG_SQL = True
+
 MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # "django.middleware.transaction.TransactionMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -45,6 +47,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # "foodgram.middleware.SQLLogMiddleware",
 ]
 
 INTERNAL_IPS = ["127.0.0.1"]
@@ -121,7 +124,6 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 6,
-    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "NON_FIELD_ERRORS_KEY": "errors",
 }
 
