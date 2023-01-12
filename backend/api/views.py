@@ -78,7 +78,7 @@ class UserWithRecipesViewSet(
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            return User.objects.filter(authors__user=self.request.user)
+            return User.objects.filter(subscriptions__user=self.request.user)
 
     def create(self, request, *args, **kwargs):
         request.data.update(author=self.get_author())

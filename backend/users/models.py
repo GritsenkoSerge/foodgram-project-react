@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib import admin
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import ASCIIUsernameValidator
 from django.db import models
@@ -50,6 +51,11 @@ class User(AbstractUser):
     def get_name(self):
         return self.get_full_name() or self.get_username()
 
+    @admin.display(description="Число подписчиков")
+    def subscription_amount(self):
+        """Число подписчиков для вывода в админке."""
+        return self.subscriptions.count()
+
 
 class UserRelated(models.Model):
     user = models.ForeignKey(
@@ -67,7 +73,7 @@ class Subscription(UserRelated):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="authors",
+        related_name="subscriptions",
         verbose_name="Автор",
         help_text="Выберите автора из списка",
     )

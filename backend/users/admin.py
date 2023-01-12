@@ -14,13 +14,6 @@ class UserAdmin(admin.ModelAdmin):
         "last_name",
         "is_staff",
     )
-    list_editable = (
-        "username",
-        "email",
-        "first_name",
-        "last_name",
-        "is_staff",
-    )
     search_fields = (
         "username",
         "email",
@@ -29,6 +22,7 @@ class UserAdmin(admin.ModelAdmin):
         "username",
         "email",
     )
+    readonly_fields = ("subscription_amount",)
     empty_value_display = settings.ADMIN_MODEL_EMPTY_VALUE
 
 
@@ -36,10 +30,6 @@ class UserAdmin(admin.ModelAdmin):
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
-        "user",
-        "author",
-    )
-    list_editable = (
         "user",
         "author",
     )
