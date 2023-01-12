@@ -140,7 +140,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         is_favorited = self.request.query_params.get("is_favorited")
         if is_favorited:
             if user.is_authenticated:
-                recipes_id = user.favorite_recipes.values("id")
+                recipes_id = FavoriteRecipe.objects.filter(user=user).values(
+                    "recipe__id"
+                )
             else:
                 recipes_id = []
             condition = Q(id__in=recipes_id)
@@ -150,7 +152,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         is_in_shopping_cart = self.request.query_params.get("is_in_shopping_cart")
         if is_in_shopping_cart:
             if user.is_authenticated:
-                recipes_id = user.shopping_cart_recipes.values("id")
+                recipes_id = ShoppingCartRecipe.objects.filter(user=user).values(
+                    "recipe__id"
+                )
             else:
                 recipes_id = []
             condition = Q(id__in=recipes_id)
@@ -197,7 +201,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         page_objects = (
             IngredientInRecipe.objects.filter(
-                recipe__in=request.user.shopping_cart_recipes.all()
+                recipe__in=ShoppingCartRecipe.objects.filter(user=request.user).values(
+                    "recipe__id"
+                )
             )
             .values("ingredient__name", "ingredient__measurement_unit")
             .annotate(Sum("amount"))
@@ -231,11 +237,11 @@ class FavoriteRecipeViewSet(
 
     def create(self, request, *args, **kwargs):
         recipe = self.get_object()
-        if recipe.favorites.filter(id=request.user.id).exists():
+        if FavoriteRecipe.objects.filter(recipe=recipe, user=request.user).exists():
             data = {"errors": "Рецепт уже есть в избранном."}
             return Response(data, status.HTTP_400_BAD_REQUEST)
-        recipe.favorites.add(request.user)
-        recipe.save()
+        instance = FavoriteRecipe(recipe=recipe, user=request.user)
+        instance.save()
         serializer = self.serializer_class(
             instance=self.get_object(), context=self.get_serializer_context()
         )
@@ -246,13 +252,10 @@ class FavoriteRecipeViewSet(
 
     def destroy(self, request, *args, **kwargs):
         recipe = self.get_object()
-        favorite_user = recipe.favorites.filter(id=request.user.id)
-        if not favorite_user:
+        if not FavoriteRecipe.objects.filter(recipe=recipe, user=request.user).exists():
             data = {"errors": "Рецепта нет в избранном."}
             return Response(data, status.HTTP_400_BAD_REQUEST)
-        FavoriteRecipe.objects.get(
-            recipe_id=recipe.id, user_id=request.user.id
-        ).delete()
+        FavoriteRecipe.objects.get(recipe=recipe, user=request.user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -267,11 +270,11 @@ class ShoppingCartRecipeViewSet(
 
     def create(self, request, *args, **kwargs):
         recipe = self.get_object()
-        if recipe.shopping_carts.filter(id=request.user.id).exists():
+        if ShoppingCartRecipe.objects.filter(recipe=recipe, user=request.user).exists():
             data = {"errors": "Рецепт уже есть в корзине."}
             return Response(data, status.HTTP_400_BAD_REQUEST)
-        recipe.shopping_carts.add(request.user)
-        recipe.save()
+        instance = ShoppingCartRecipe(recipe=recipe, user=request.user)
+        instance.save()
         serializer = self.serializer_class(
             instance=self.get_object(), context=self.get_serializer_context()
         )
@@ -282,11 +285,10 @@ class ShoppingCartRecipeViewSet(
 
     def destroy(self, request, *args, **kwargs):
         recipe = self.get_object()
-        shopping_cart_user = recipe.shopping_carts.filter(id=request.user.id)
-        if not shopping_cart_user:
+        if not ShoppingCartRecipe.objects.filter(
+            recipe=recipe, user=request.user
+        ).exists():
             data = {"errors": "Рецепта нет в корзине."}
             return Response(data, status.HTTP_400_BAD_REQUEST)
-        ShoppingCartRecipe.objects.get(
-            recipe_id=recipe.id, user_id=request.user.id
-        ).delete()
+        ShoppingCartRecipe.objects.get(recipe=recipe, user=request.user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

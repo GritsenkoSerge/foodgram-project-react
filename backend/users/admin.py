@@ -22,7 +22,10 @@ class UserAdmin(admin.ModelAdmin):
         "username",
         "email",
     )
-    readonly_fields = ("subscription_amount",)
+    readonly_fields = (
+        "subscription_amount",
+        "recipe_amount",
+    )
     empty_value_display = settings.ADMIN_MODEL_EMPTY_VALUE
 
 

@@ -31,7 +31,7 @@ class Recipe(models.Model):
     text = models.TextField(
         "Текстовое описание", help_text="Введите текстовое описание"
     )
-    cooking_time = models.PositiveIntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         "Время приготовления в минутах",
         help_text="Введите время приготовления в минутах",
         validators=[
@@ -47,22 +47,6 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(
         Tag, through="TagRecipe", verbose_name="Теги", help_text="Выберите теги"
     )
-    favorites = models.ManyToManyField(
-        User,
-        through="FavoriteRecipe",
-        verbose_name="Избранное",
-        related_name="favorite_recipes",
-        blank=True,
-        help_text="Выберите пользователей, для добавления в избранное",
-    )
-    shopping_carts = models.ManyToManyField(
-        User,
-        through="ShoppingCartRecipe",
-        verbose_name="Корзины",
-        related_name="shopping_cart_recipes",
-        blank=True,
-        help_text="Выберите пользователей, для добавления в их корзины",
-    )
 
     class Meta:
         verbose_name = "Рецепт"
@@ -76,7 +60,7 @@ class Recipe(models.Model):
     @admin.display(description="Число добавлений в избранное")
     def favorite_amount(self):
         """Число добавлений рецепта в избранное для вывода в админке."""
-        return self.favorites.count()
+        return FavoriteRecipe.objects.filter(recipe=self.id).count()
 
 
 class RecipeRelated(models.Model):
@@ -141,7 +125,7 @@ class IngredientInRecipe(RecipeRelated):
         verbose_name="Ингредиент рецепта",
         help_text="Выберите ингредиент рецепта",
     )
-    amount = models.PositiveIntegerField(
+    amount = models.PositiveSmallIntegerField(
         "Количество ингридиента",
         help_text="Введите количество ингридиента",
         validators=[

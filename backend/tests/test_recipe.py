@@ -30,11 +30,9 @@ class TestRecipe:
         "name": (models.CharField, None),
         "image": (models.ImageField, None),
         "text": (models.TextField, None),
-        "cooking_time": (models.PositiveIntegerField, None),
+        "cooking_time": (models.PositiveSmallIntegerField, None),
         "ingredients": (models.ManyToManyField, Ingredient),
         "tags": (models.ManyToManyField, Tag),
-        "favorites": (models.ManyToManyField, User),
-        "shopping_carts": (models.ManyToManyField, User),
     }
     URL_RECIPES = "/api/recipes/"
     URL_RECIPES_ID = "/api/recipes/{}/"

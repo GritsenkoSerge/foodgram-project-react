@@ -9,7 +9,12 @@ from djoser import serializers as djoser_serializers
 from rest_framework import serializers as serializers
 
 from ingredients.models import Ingredient
-from recipes.models import IngredientInRecipe, Recipe
+from recipes.models import (
+    IngredientInRecipe,
+    Recipe,
+    FavoriteRecipe,
+    ShoppingCartRecipe,
+)
 from tags.models import Tag
 from users.models import Subscription, User
 
@@ -217,18 +222,20 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        exclude = (
-            "shopping_carts",
-            "created",
-            "favorites",
-        )
+        exclude = ("created",)
 
     def get_is_favorited(self, recipe):
-        user = self.context.get("request").user
-        if user.is_authenticated:
-            return user.favorite_recipes.filter(id=recipe.id).exists()
+        request = self.context["request"]
+        return (
+            request.user.is_authenticated
+            and FavoriteRecipe.objects.filter(recipe=recipe, user=request.user).exists()
+        )
 
     def get_is_in_shopping_cart(self, recipe):
-        user = self.context.get("request").user
-        if user.is_authenticated:
-            return user.shopping_cart_recipes.filter(id=recipe.id).exists()
+        request = self.context["request"]
+        return (
+            request.user.is_authenticated
+            and ShoppingCartRecipe.objects.filter(
+                recipe=recipe, user=request.user
+            ).exists()
+        )

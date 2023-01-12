@@ -21,7 +21,7 @@ class TestIngredientInRecipe:
     MODEL_FIELDS = {
         "recipe": (models.ForeignKey, Recipe),
         "ingredient": (models.ForeignKey, Ingredient),
-        "amount": (models.PositiveIntegerField, None),
+        "amount": (models.PositiveSmallIntegerField, None),
     }
 
     def test_recipe_tag_model(self):

@@ -51,10 +51,15 @@ class User(AbstractUser):
     def get_name(self):
         return self.get_full_name() or self.get_username()
 
-    @admin.display(description="Число подписчиков")
+    @admin.display(description="Количество подписчиков")
     def subscription_amount(self):
-        """Число подписчиков для вывода в админке."""
+        """Количество подписчиков для вывода в админке."""
         return self.subscriptions.count()
+
+    @admin.display(description="Количество рецептов")
+    def recipe_amount(self):
+        """Количество рецептов для вывода в админке."""
+        return self.recipes.count()
 
 
 class UserRelated(models.Model):
