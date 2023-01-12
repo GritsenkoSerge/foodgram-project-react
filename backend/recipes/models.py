@@ -57,11 +57,6 @@ class Recipe(models.Model):
     def __str__(self) -> str:
         return f"id: {self.id} Автор: {str(self.author)} Название: {self.name}"
 
-    @admin.display(description="Число добавлений в избранное")
-    def favorite_amount(self):
-        """Число добавлений рецепта в избранное для вывода в админке."""
-        return FavoriteRecipe.objects.filter(recipe=self.id).count()
-
 
 class RecipeRelated(models.Model):
     recipe = models.ForeignKey(
@@ -138,4 +133,6 @@ class IngredientInRecipe(RecipeRelated):
         verbose_name_plural = "Ингредиенты рецептов"
 
     def __str__(self) -> str:
-        return f"{self.ingredient} — {self.amount}"
+        return (
+            f"{self.ingredient.name} — {self.amount} {self.ingredient.measurement_unit}"
+        )

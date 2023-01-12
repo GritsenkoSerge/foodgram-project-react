@@ -10,16 +10,39 @@ from .models import (
 )
 
 
+class IngredientInRecipeInline(admin.TabularInline):
+    model = IngredientInRecipe
+
+
+class FavoriteRecipeInline(admin.TabularInline):
+    model = FavoriteRecipe
+
+
+class TagRecipeInline(admin.TabularInline):
+    model = TagRecipe
+
+
+class ShoppingCartRecipeInline(admin.TabularInline):
+    model = ShoppingCartRecipe
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
+    @admin.display(description="Число добавлений в избранное")
+    def favorite_amount(self):
+        """Число добавлений рецепта в избранное для вывода в админке."""
+        return FavoriteRecipe.objects.filter(recipe=self.id).count()
+
+    @admin.display(description="Игредиенты")
+    def ingredients_in_recipe(self):
+        """Ингредиенты рецепта для вывода в админке."""
+        return ", ".join(map(str, self.ingredientinrecipe_set.all()))
+
     list_display = (
         "pk",
         "name",
         "author",
-    )
-    list_editable = (
-        "name",
-        "author",
+        ingredients_in_recipe,
     )
     search_fields = (
         "author",
@@ -30,7 +53,13 @@ class RecipeAdmin(admin.ModelAdmin):
         "author",
         "tags",
     )
-    readonly_fields = ("favorite_amount",)
+    inlines = (
+        IngredientInRecipeInline,
+        FavoriteRecipeInline,
+        TagRecipeInline,
+        ShoppingCartRecipeInline,
+    )
+    readonly_fields = (favorite_amount,)
     empty_value_display = settings.ADMIN_MODEL_EMPTY_VALUE
 
 
@@ -42,11 +71,7 @@ class IngredientInRecipeAdmin(admin.ModelAdmin):
         "ingredient",
         "amount",
     )
-    list_editable = (
-        "recipe",
-        "ingredient",
-        "amount",
-    )
+    list_editable = ("amount",)
     list_filter = (
         "recipe",
         "ingredient",
@@ -58,10 +83,6 @@ class IngredientInRecipeAdmin(admin.ModelAdmin):
 class FavoriteRecipeAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
-        "recipe",
-        "user",
-    )
-    list_editable = (
         "recipe",
         "user",
     )
@@ -79,10 +100,6 @@ class ShoppingCartRecipeAdmin(admin.ModelAdmin):
         "recipe",
         "user",
     )
-    list_editable = (
-        "recipe",
-        "user",
-    )
     list_filter = (
         "recipe",
         "user",
@@ -94,10 +111,6 @@ class ShoppingCartRecipeAdmin(admin.ModelAdmin):
 class TagRecipeAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
-        "recipe",
-        "tag",
-    )
-    list_editable = (
         "recipe",
         "tag",
     )
