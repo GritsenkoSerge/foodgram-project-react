@@ -39,6 +39,7 @@ class User(AbstractUser):
     )
 
     class Meta:
+        ordering = ("email",)
         db_table = "auth_user"
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
@@ -50,18 +51,23 @@ class User(AbstractUser):
         return self.get_full_name() or self.get_username()
 
 
-class Subscription(models.Model):
+class UserRelated(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="subscriber",
-        verbose_name="Подписчик",
-        help_text="Выберите подписчика из списка",
+        verbose_name="Пользователь",
+        help_text="Выберите из списка пользователя",
     )
+
+    class Meta:
+        abstract = True
+
+
+class Subscription(UserRelated):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="subscribed",
+        related_name="authors",
         verbose_name="Автор",
         help_text="Выберите автора из списка",
     )

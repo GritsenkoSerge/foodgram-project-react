@@ -1,13 +1,11 @@
 from django.conf import settings
 from django.contrib import admin
-from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
 from ingredients.models import Ingredient
 from tags.models import Tag
-
-User = get_user_model()
+from users.models import User, UserRelated
 
 
 class Recipe(models.Model):
@@ -87,18 +85,6 @@ class RecipeRelated(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Рецепт",
         help_text="Выберите рецепт",
-    )
-
-    class Meta:
-        abstract = True
-
-
-class UserRelated(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name="Пользователь",
-        help_text="Выберите из списка пользователя",
     )
 
     class Meta:

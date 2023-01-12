@@ -1,6 +1,5 @@
 import pdfkit
 from datetime import datetime
-from django.contrib.auth.base_user import AbstractBaseUser
 from django.db.models import Sum
 from django.db.models.query_utils import Q
 from django.http import Http404, HttpResponse, JsonResponse
@@ -78,8 +77,8 @@ class UserWithRecipesViewSet(
         return super().get_serializer_class()
 
     def get_queryset(self):
-        if isinstance(self.request.user, AbstractBaseUser):
-            return User.objects.filter(subscribed__user=self.request.user)
+        if self.request.user.is_authenticated:
+            return User.objects.filter(authors__user=self.request.user)
 
     def create(self, request, *args, **kwargs):
         request.data.update(author=self.get_author())
