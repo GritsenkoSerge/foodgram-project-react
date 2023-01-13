@@ -186,7 +186,8 @@ class TestRecipe:
         ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
         json = response.json()
         fields = (
-            "image",
+            "ingredients",
+            "tags",
             "name",
             "text",
             "cooking_time",
