@@ -424,7 +424,7 @@ class TestRecipe:
 
     # patch /api/recipes/{id}/ 404
     @pytest.mark.django_db(transaction=True)
-    def test_recipe__update_not_found(self, client, recipe, ingredient, tag):
+    def test_recipe__update_not_found(self, api_client, recipe, ingredient, tag):
         not_found_id = 404
         url = self.URL_RECIPES_ID.format(recipe.id)
         data = {
@@ -439,8 +439,8 @@ class TestRecipe:
             "text": "string",
             "cooking_time": 1,
         }
-        response = client.patch(url, data=data, format="json")
-        code_expected = status.HTTP_401_UNAUTHORIZED
+        response = api_client.patch(url, data=data, format="json")
+        code_expected = status.HTTP_404_NOT_FOUND
         assert (
             response.status_code == code_expected
         ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
@@ -461,8 +461,8 @@ class TestRecipe:
             "text": "string",
             "cooking_time": 1,
         }
-        response = client.patch(url, data=data, format="json")
-        code_expected = status.HTTP_401_UNAUTHORIZED
+        response = api_client.patch(url, data=data, format="json")
+        code_expected = status.HTTP_404_NOT_FOUND
         assert (
             response.status_code == code_expected
         ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."

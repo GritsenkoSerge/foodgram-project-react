@@ -124,7 +124,32 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeListSerializer
     edit_serializer_class = RecipeSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly)
+    edit_permission_classes = (IsAuthorOrReadOnly,)
+
+    @staticmethod
+    def generate_shopping_cart_pdf(queryset, user):
+        data = {
+            "page_objects": queryset,
+            "user": user,
+            "created": datetime.now(),
+        }
+
+        template = get_template("shopping_cart.html")
+        html = template.render(data)
+        pdf = pdfkit.from_string(html, False, options={"encoding": "UTF-8"})
+
+        filename = "shopping_cart.pdf"
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
+    def get_permissions(self):
+        if self.action in (
+            "destroy",
+            "partial_update",
+        ):
+            return [permission() for permission in self.edit_permission_classes]
+        return super().get_permissions()
 
     def get_serializer_class(self):
         if self.action in (
@@ -173,33 +198,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(id__in=recipes_id)
         return queryset
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        recipe = self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        # после создания возвращаем основной сериализатор
-        serializer = self.serializer_class(
-            instance=recipe, context=self.get_serializer_context()
-        )
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
-
-    def perform_create(self, serializer):
-        return serializer.save(author=self.request.user)
-
-    def update(self, request, *args, **kwargs):
-        super().update(request, *args, **kwargs)
-        # после изменения возвращаем основной сериализатор
-        serializer = self.serializer_class(
-            instance=self.get_object(), context=self.get_serializer_context()
-        )
-        return Response(serializer.data)
-
     @action(permission_classes=((IsAuthenticated,)), detail=False)
     def download_shopping_cart(self, request):
-        page_objects = (
+        queryset = (
             IngredientInRecipe.objects.filter(
                 recipe__in=ShoppingCartRecipe.objects.filter(user=request.user).values(
                     "recipe__id"
@@ -210,27 +211,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
             .order_by("ingredient__name")
         )
 
-        data = {
-            "page_objects": page_objects,
-            "user": request.user,
-            "created": datetime.now(),
-        }
-
-        template = get_template("shopping_cart.html")
-        html = template.render(data)
-        pdf = pdfkit.from_string(html, False, options={"encoding": "UTF-8"})
-
-        filename = "shopping_cart.pdf"
-        response = HttpResponse(pdf, content_type="application/pdf")
-        response["Content-Disposition"] = f'attachment; filename="{filename}"'
-        return response
+        return RecipeViewSet.generate_shopping_cart_pdf(queryset, request.user)
 
 
 class FavoriteRecipeViewSet(
     mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
     serializer_class = RecipeMinifiedSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_object(self):
         return get_object_or_404(Recipe, id=self.kwargs.get("id"))
@@ -263,7 +250,6 @@ class ShoppingCartRecipeViewSet(
     mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
     serializer_class = RecipeMinifiedSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_object(self):
         return get_object_or_404(Recipe, id=self.kwargs.get("id"))
