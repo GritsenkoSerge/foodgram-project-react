@@ -4,7 +4,7 @@ from rest_framework import status
 from recipes.models import FavoriteRecipe
 
 
-class TestRecipe:
+class TestFavoriteRecipe:
     URL_RECIPES_ID_FAVORITE = "/api/recipes/{}/favorite/"
 
     # post /api/recipes/{id}/favorite/ 201
@@ -16,7 +16,7 @@ class TestRecipe:
         ).exists(), (
             "Убедитесь, что перед запросом `{url}`, рецепт не находится в избранном."
         )
-        response = api_client.post(url)
+        response = api_client.post(url, format="json")
         code_expected = status.HTTP_201_CREATED
         assert (
             response.status_code == code_expected

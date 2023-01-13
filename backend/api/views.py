@@ -8,7 +8,7 @@ from django.template.loader import get_template
 from djoser import views
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.permissions import IsAuthorOrReadOnly
@@ -213,68 +213,54 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         return RecipeViewSet.generate_shopping_cart_pdf(queryset, request.user)
 
-
-class FavoriteRecipeViewSet(
-    mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
-    serializer_class = RecipeMinifiedSerializer
-
-    def get_object(self):
-        return get_object_or_404(Recipe, id=self.kwargs.get("id"))
-
-    def create(self, request, *args, **kwargs):
-        recipe = self.get_object()
-        if FavoriteRecipe.objects.filter(recipe=recipe, user=request.user).exists():
-            data = {"errors": "Рецепт уже есть в избранном."}
-            return Response(data, status.HTTP_400_BAD_REQUEST)
-        instance = FavoriteRecipe(recipe=recipe, user=request.user)
+    @staticmethod
+    def create_related_object(request, pk, model, serializer, error):
+        recipe = get_object_or_404(Recipe, id=pk)
+        if model.objects.filter(recipe=recipe, user=request.user).exists():
+            return Response({"errors": error}, status.HTTP_400_BAD_REQUEST)
+        instance = model(recipe=recipe, user=request.user)
         instance.save()
-        serializer = self.serializer_class(
-            instance=self.get_object(), context=self.get_serializer_context()
+        serializer = serializer(
+            get_object_or_404(Recipe, id=pk), context={"request": request}
         )
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def destroy(self, request, *args, **kwargs):
-        recipe = self.get_object()
-        if not FavoriteRecipe.objects.filter(recipe=recipe, user=request.user).exists():
-            data = {"errors": "Рецепта нет в избранном."}
-            return Response(data, status.HTTP_400_BAD_REQUEST)
-        FavoriteRecipe.objects.get(recipe=recipe, user=request.user).delete()
+    @staticmethod
+    def delete_related_object(request, pk, model, error):
+        recipe = get_object_or_404(Recipe, id=pk)
+        if not model.objects.filter(recipe=recipe, user=request.user).exists():
+            return Response({"errors": error}, status.HTTP_400_BAD_REQUEST)
+        model.objects.get(recipe=recipe, user=request.user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class ShoppingCartRecipeViewSet(
-    mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
-    serializer_class = RecipeMinifiedSerializer
-
-    def get_object(self):
-        return get_object_or_404(Recipe, id=self.kwargs.get("id"))
-
-    def create(self, request, *args, **kwargs):
-        recipe = self.get_object()
-        if ShoppingCartRecipe.objects.filter(recipe=recipe, user=request.user).exists():
-            data = {"errors": "Рецепт уже есть в корзине."}
-            return Response(data, status.HTTP_400_BAD_REQUEST)
-        instance = ShoppingCartRecipe(recipe=recipe, user=request.user)
-        instance.save()
-        serializer = self.serializer_class(
-            instance=self.get_object(), context=self.get_serializer_context()
-        )
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+    @action(methods=["post"], detail=True)
+    def favorite(self, request, pk):
+        return RecipeViewSet.create_related_object(
+            request,
+            pk,
+            FavoriteRecipe,
+            RecipeMinifiedSerializer,
+            "Рецепт уже есть в избранном.",
         )
 
-    def destroy(self, request, *args, **kwargs):
-        recipe = self.get_object()
-        if not ShoppingCartRecipe.objects.filter(
-            recipe=recipe, user=request.user
-        ).exists():
-            data = {"errors": "Рецепта нет в корзине."}
-            return Response(data, status.HTTP_400_BAD_REQUEST)
-        ShoppingCartRecipe.objects.get(recipe=recipe, user=request.user).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    @favorite.mapping.delete
+    def delete_favorite(self, request, pk):
+        return RecipeViewSet.delete_related_object(
+            request, pk, FavoriteRecipe, "Рецепта нет в избранном."
+        )
+
+    @action(methods=["post"], detail=True)
+    def shopping_cart(self, request, pk):
+        return RecipeViewSet.create_related_object(
+            request,
+            pk,
+            ShoppingCartRecipe,
+            RecipeMinifiedSerializer,
+            "Рецепт уже есть в корзине.",
+        )
+
+    @shopping_cart.mapping.delete
+    def delete_shopping_cart(self, request, pk):
+        return RecipeViewSet.delete_related_object(
+            request, pk, ShoppingCartRecipe, "Рецепта нет в корзине."
+        )

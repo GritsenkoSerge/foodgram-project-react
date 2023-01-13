@@ -4,7 +4,7 @@ from rest_framework import status
 from recipes.models import ShoppingCartRecipe
 
 
-class TestRecipe:
+class TestShoppingCartRecipe:
     URL_RECIPES_ID_SHOPPING_CART = "/api/recipes/{}/shopping_cart/"
     URL_RECIPES_DOWNLOAD_SHOPPING_CART = "/api/recipes/download_shopping_cart/"
 
