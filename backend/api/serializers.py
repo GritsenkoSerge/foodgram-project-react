@@ -226,15 +226,3 @@ class RecipeSerializer(serializers.ModelSerializer):
                 "Время приготовления должно быть больше нуля."
             )
         return super().validate(attrs)
-
-    # def is_valid(self, raise_exception=False):
-    #     if raise_exception:
-    #         tags_id = self.initial_data.get("tags")
-    #         if isinstance(tags_id, list):
-    #             for id in tags_id:
-    #                 get_object_or_404(Tag, id=id)
-    #         ingredients = self.initial_data.get("ingredients")
-    #         if isinstance(ingredients, list):
-    #             for ingredient in ingredients:
-    #                 get_object_or_404(Ingredient, id=ingredient["id"])
-    #     return super().is_valid(raise_exception)
