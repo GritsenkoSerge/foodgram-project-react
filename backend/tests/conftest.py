@@ -8,7 +8,13 @@ from rest_framework.test import APIClient
 
 from foodgram.settings import INSTALLED_APPS
 from ingredients.models import Ingredient
-from recipes.models import Recipe, IngredientInRecipe, TagRecipe
+from recipes.models import (
+    Recipe,
+    IngredientInRecipe,
+    TagRecipe,
+    FavoriteRecipe,
+    ShoppingCartRecipe,
+)
 from tags.models import Tag
 from users.models import Subscription
 
@@ -182,23 +188,23 @@ def one_more_denied_recipe(mixer, another_user, ingredient, few_ingredients):
 
 @pytest.fixture
 def favorite_recipe(denied_recipe, user):
-    instance = denied_recipe
-    instance.favorites.add(user)
-    return instance
+    instance = FavoriteRecipe(recipe=denied_recipe, user=user)
+    instance.save()
+    return denied_recipe
 
 
 @pytest.fixture
 def shopping_cart_recipe(denied_recipe, user):
-    instance = denied_recipe
-    instance.shopping_carts.add(user)
-    return instance
+    instance = ShoppingCartRecipe(recipe=denied_recipe, user=user)
+    instance.save()
+    return denied_recipe
 
 
 @pytest.fixture
 def one_more_shopping_cart_recipe(recipe, user, recipe_ingredient):
-    instance = recipe
-    instance.shopping_carts.add(user)
-    return instance
+    instance = ShoppingCartRecipe(recipe=recipe, user=user)
+    instance.save()
+    return recipe
 
 
 @pytest.fixture

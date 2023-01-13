@@ -1,13 +1,10 @@
 from django.conf import settings
-from django.contrib import admin
-from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
 from ingredients.models import Ingredient
 from tags.models import Tag
-
-User = get_user_model()
+from users.models import User, UserRelated
 
 
 class Recipe(models.Model):
@@ -33,7 +30,7 @@ class Recipe(models.Model):
     text = models.TextField(
         "Текстовое описание", help_text="Введите текстовое описание"
     )
-    cooking_time = models.PositiveIntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         "Время приготовления в минутах",
         help_text="Введите время приготовления в минутах",
         validators=[
@@ -49,22 +46,6 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(
         Tag, through="TagRecipe", verbose_name="Теги", help_text="Выберите теги"
     )
-    favorites = models.ManyToManyField(
-        User,
-        through="FavoriteRecipe",
-        verbose_name="Избранное",
-        related_name="favorite_recipes",
-        blank=True,
-        help_text="Выберите пользователей, для добавления в избранное",
-    )
-    shopping_carts = models.ManyToManyField(
-        User,
-        through="ShoppingCartRecipe",
-        verbose_name="Корзины",
-        related_name="shopping_cart_recipes",
-        blank=True,
-        help_text="Выберите пользователей, для добавления в их корзины",
-    )
 
     class Meta:
         verbose_name = "Рецепт"
@@ -75,11 +56,6 @@ class Recipe(models.Model):
     def __str__(self) -> str:
         return f"id: {self.id} Автор: {str(self.author)} Название: {self.name}"
 
-    @admin.display(description="Число добавлений в избранное")
-    def favorite_amount(self):
-        """Число добавлений рецепта в избранное для вывода в админке."""
-        return self.favorites.count()
-
 
 class RecipeRelated(models.Model):
     recipe = models.ForeignKey(
@@ -87,18 +63,6 @@ class RecipeRelated(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Рецепт",
         help_text="Выберите рецепт",
-    )
-
-    class Meta:
-        abstract = True
-
-
-class UserRelated(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name="Пользователь",
-        help_text="Выберите из списка пользователя",
     )
 
     class Meta:
@@ -155,7 +119,7 @@ class IngredientInRecipe(RecipeRelated):
         verbose_name="Ингредиент рецепта",
         help_text="Выберите ингредиент рецепта",
     )
-    amount = models.PositiveIntegerField(
+    amount = models.PositiveSmallIntegerField(
         "Количество ингридиента",
         help_text="Введите количество ингридиента",
         validators=[
@@ -168,4 +132,6 @@ class IngredientInRecipe(RecipeRelated):
         verbose_name_plural = "Ингредиенты рецептов"
 
     def __str__(self) -> str:
-        return f"{self.ingredient} — {self.amount}"
+        return (
+            f"{self.ingredient.name} — {self.amount} {self.ingredient.measurement_unit}"
+        )

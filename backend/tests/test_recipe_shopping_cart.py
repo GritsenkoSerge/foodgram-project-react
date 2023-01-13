@@ -1,8 +1,10 @@
 import pytest
 from rest_framework import status
 
+from recipes.models import ShoppingCartRecipe
 
-class TestRecipe:
+
+class TestShoppingCartRecipe:
     URL_RECIPES_ID_SHOPPING_CART = "/api/recipes/{}/shopping_cart/"
     URL_RECIPES_DOWNLOAD_SHOPPING_CART = "/api/recipes/download_shopping_cart/"
 
@@ -10,8 +12,8 @@ class TestRecipe:
     @pytest.mark.django_db(transaction=True)
     def test_recipes_shopping_cart__create_valid(self, api_client, recipe, user):
         url = self.URL_RECIPES_ID_SHOPPING_CART.format(recipe.id)
-        assert not user.shopping_cart_recipes.filter(
-            id=recipe.id
+        assert not ShoppingCartRecipe.objects.filter(
+            recipe=recipe, user=user
         ).exists(), (
             "Убедитесь, что перед запросом `{url}`, рецепт не находится в корзине."
         )
@@ -35,8 +37,8 @@ class TestRecipe:
             f"Убедитесь, что при запросе `{url}`, "
             f"возвращается рецепт с названием `{fields}`"
         )
-        assert user.shopping_cart_recipes.filter(
-            id=recipe.id
+        assert ShoppingCartRecipe.objects.filter(
+            recipe=recipe, user=user
         ).exists(), f"Убедитесь, что после запроса `{url}`, рецепт находится в корзине."
 
     # post /api/recipes/{id}/shopping_cart/ 400
@@ -45,8 +47,8 @@ class TestRecipe:
         self, api_client, shopping_cart_recipe, user
     ):
         url = self.URL_RECIPES_ID_SHOPPING_CART.format(shopping_cart_recipe.id)
-        assert user.shopping_cart_recipes.filter(
-            id=shopping_cart_recipe.id
+        assert ShoppingCartRecipe.objects.filter(
+            recipe=shopping_cart_recipe, user=user
         ).exists(), (
             f"Убедитесь, что перед запросом `{url}`, рецепт находится в корзине."
         )
@@ -80,8 +82,8 @@ class TestRecipe:
         self, api_client, shopping_cart_recipe, user
     ):
         url = self.URL_RECIPES_ID_SHOPPING_CART.format(shopping_cart_recipe.id)
-        assert user.shopping_cart_recipes.filter(
-            id=shopping_cart_recipe.id
+        assert ShoppingCartRecipe.objects.filter(
+            recipe=shopping_cart_recipe, user=user
         ).exists(), (
             f"Убедитесь, что перед запросом `{url}`, рецепт находится в корзине."
         )
@@ -93,8 +95,8 @@ class TestRecipe:
         assert (
             not response.content
         ), f"Убедитесь, что при запросе `{url}`, возвращается пустой content."
-        assert not user.shopping_cart_recipes.filter(
-            id=shopping_cart_recipe.id
+        assert not ShoppingCartRecipe.objects.filter(
+            recipe=shopping_cart_recipe, user=user
         ).exists(), (
             f"Убедитесь, что при запросе `{url}`, рецепт удаляется из избранного."
         )
@@ -103,8 +105,8 @@ class TestRecipe:
     @pytest.mark.django_db(transaction=True)
     def test_recipes_shopping_cart__delete_invalide(self, api_client, recipe, user):
         url = self.URL_RECIPES_ID_SHOPPING_CART.format(recipe.id)
-        assert not user.shopping_cart_recipes.filter(
-            id=recipe.id
+        assert not ShoppingCartRecipe.objects.filter(
+            recipe=recipe, user=user
         ).exists(), (
             "Убедитесь, что перед запросом `{url}`, рецепт не находится в корзине."
         )

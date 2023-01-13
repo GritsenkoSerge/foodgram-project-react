@@ -1,20 +1,22 @@
 import pytest
 from rest_framework import status
 
+from recipes.models import FavoriteRecipe
 
-class TestRecipe:
+
+class TestFavoriteRecipe:
     URL_RECIPES_ID_FAVORITE = "/api/recipes/{}/favorite/"
 
     # post /api/recipes/{id}/favorite/ 201
     @pytest.mark.django_db(transaction=True)
     def test_recipes_favorite__create_valid(self, api_client, recipe, user):
         url = self.URL_RECIPES_ID_FAVORITE.format(recipe.id)
-        assert not user.favorite_recipes.filter(
-            id=recipe.id
+        assert not FavoriteRecipe.objects.filter(
+            recipe=recipe, user=user
         ).exists(), (
             "Убедитесь, что перед запросом `{url}`, рецепт не находится в избранном."
         )
-        response = api_client.post(url)
+        response = api_client.post(url, format="json")
         code_expected = status.HTTP_201_CREATED
         assert (
             response.status_code == code_expected
@@ -34,8 +36,8 @@ class TestRecipe:
             f"Убедитесь, что при запросе `{url}`, "
             f"возвращается рецепт с названием `{fields}`"
         )
-        assert user.favorite_recipes.filter(
-            id=recipe.id
+        assert FavoriteRecipe.objects.filter(
+            recipe=recipe, user=user
         ).exists(), (
             f"Убедитесь, что после запроса `{url}`, рецепт находится в избранном."
         )
@@ -44,8 +46,8 @@ class TestRecipe:
     @pytest.mark.django_db(transaction=True)
     def test_recipes_favorite__create_invalid(self, api_client, favorite_recipe, user):
         url = self.URL_RECIPES_ID_FAVORITE.format(favorite_recipe.id)
-        assert user.favorite_recipes.filter(
-            id=favorite_recipe.id
+        assert FavoriteRecipe.objects.filter(
+            recipe=favorite_recipe, user=user
         ).exists(), (
             f"Убедитесь, что перед запросом `{url}`, рецепт находится в избранном."
         )
@@ -77,8 +79,8 @@ class TestRecipe:
     @pytest.mark.django_db(transaction=True)
     def test_recipes_favorite__delete_valid(self, api_client, favorite_recipe, user):
         url = self.URL_RECIPES_ID_FAVORITE.format(favorite_recipe.id)
-        assert user.favorite_recipes.filter(
-            id=favorite_recipe.id
+        assert FavoriteRecipe.objects.filter(
+            recipe=favorite_recipe, user=user
         ).exists(), (
             f"Убедитесь, что перед запросом `{url}`, рецепт находится в избранном."
         )
@@ -90,8 +92,8 @@ class TestRecipe:
         assert (
             not response.content
         ), f"Убедитесь, что при запросе `{url}`, возвращается пустой content."
-        assert not user.favorite_recipes.filter(
-            id=favorite_recipe.id
+        assert not FavoriteRecipe.objects.filter(
+            recipe=favorite_recipe, user=user
         ).exists(), (
             f"Убедитесь, что при запросе `{url}`, рецепт удаляется из избранного."
         )
@@ -100,8 +102,8 @@ class TestRecipe:
     @pytest.mark.django_db(transaction=True)
     def test_recipes_favorite__delete_invalide(self, api_client, recipe, user):
         url = self.URL_RECIPES_ID_FAVORITE.format(recipe.id)
-        assert not user.favorite_recipes.filter(
-            id=recipe.id
+        assert not FavoriteRecipe.objects.filter(
+            recipe=recipe, user=user
         ).exists(), (
             "Убедитесь, что перед запросом `{url}`, рецепт не находится в избранном."
         )

@@ -3,10 +3,8 @@ from djoser.views import TokenDestroyView, UserViewSet
 from rest_framework import routers
 
 from .views import (
-    FavoriteRecipeViewSet,
     IngredientViewSet,
     RecipeViewSet,
-    ShoppingCartRecipeViewSet,
     TagViewSet,
     TokenCreateView,
     UserWithRecipesViewSet,
@@ -40,19 +38,6 @@ users_patterns = [
     ),
 ]
 
-recipes_patterns = [
-    path(
-        r"<int:id>/favorite/",
-        FavoriteRecipeViewSet.as_view({"post": "create", "delete": "destroy"}),
-        name="favorite",
-    ),
-    path(
-        r"<int:id>/shopping_cart/",
-        ShoppingCartRecipeViewSet.as_view({"post": "create", "delete": "destroy"}),
-        name="shopping-cart",
-    ),
-]
-
 router = routers.DefaultRouter()
 router.register(r"tags", TagViewSet, basename="tags")
 router.register(r"ingredients", IngredientViewSet, basename="ingredients")
@@ -61,6 +46,5 @@ router.register(r"recipes", RecipeViewSet, basename="recipes")
 urlpatterns = [
     path(r"auth/", include(auth_patterns)),
     path(r"users/", include(users_patterns)),
-    path(r"recipes/", include(recipes_patterns)),
     path(r"", include(router.urls)),
 ]
