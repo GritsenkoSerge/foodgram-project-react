@@ -11,6 +11,7 @@ from .models import (
 
 
 class IngredientInRecipeInline(admin.TabularInline):
+    template = "admin/edit_inline/custom_tabular.html"
     model = IngredientInRecipe
     extra = 0
     min_num = 1
@@ -22,6 +23,7 @@ class FavoriteRecipeInline(admin.TabularInline):
 
 
 class TagRecipeInline(admin.TabularInline):
+    template = "admin/edit_inline/custom_tabular.html"
     model = TagRecipe
     extra = 0
     min_num = 1
@@ -67,6 +69,19 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     readonly_fields = (favorite_amount,)
     empty_value_display = settings.ADMIN_MODEL_EMPTY_VALUE
+
+    def get_formsets_with_inlines(self, request, obj=None):
+        for inline in self.get_inline_instances(request, obj):
+            formset = inline.get_formset(request, obj)
+            yield formset, inline
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        form_field = super().formfield_for_manytomany(db_field, request, **kwargs)
+        return form_field
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        form_field = super().formfield_for_foreignkey(db_field, request, **kwargs)
+        return form_field
 
 
 @admin.register(IngredientInRecipe)
