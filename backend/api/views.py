@@ -1,5 +1,6 @@
-import pdfkit
 from datetime import datetime
+
+import pdfkit
 from django.db.models import Sum
 from django.db.models.query_utils import Q
 from django.http import Http404, HttpResponse, JsonResponse
@@ -23,11 +24,11 @@ from api.serializers import (
 )
 from ingredients.models import Ingredient
 from recipes.models import (
-    IngredientInRecipe,
     FavoriteRecipe,
+    IngredientInRecipe,
     Recipe,
-    TagRecipe,
     ShoppingCartRecipe,
+    TagRecipe,
 )
 from tags.models import Tag
 from users.models import Subscription, User
@@ -79,6 +80,7 @@ class UserWithRecipesViewSet(
     def get_queryset(self):
         if self.request.user.is_authenticated:
             return User.objects.filter(subscriptions__user=self.request.user)
+        return None
 
     def create(self, request, *args, **kwargs):
         request.data.update(author=self.get_author())

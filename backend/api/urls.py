@@ -2,7 +2,7 @@ from django.urls import include, path
 from djoser.views import TokenDestroyView, UserViewSet
 from rest_framework import routers
 
-from .views import (
+from api.views import (
     IngredientViewSet,
     RecipeViewSet,
     TagViewSet,

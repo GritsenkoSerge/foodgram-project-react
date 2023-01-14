@@ -9,11 +9,11 @@ from rest_framework.test import APIClient
 from foodgram.settings import INSTALLED_APPS
 from ingredients.models import Ingredient
 from recipes.models import (
-    Recipe,
-    IngredientInRecipe,
-    TagRecipe,
     FavoriteRecipe,
+    IngredientInRecipe,
+    Recipe,
     ShoppingCartRecipe,
+    TagRecipe,
 )
 from tags.models import Tag
 from users.models import Subscription

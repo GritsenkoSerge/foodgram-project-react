@@ -70,19 +70,6 @@ class RecipeAdmin(admin.ModelAdmin):
     readonly_fields = (favorite_amount,)
     empty_value_display = settings.ADMIN_MODEL_EMPTY_VALUE
 
-    def get_formsets_with_inlines(self, request, obj=None):
-        for inline in self.get_inline_instances(request, obj):
-            formset = inline.get_formset(request, obj)
-            yield formset, inline
-
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        form_field = super().formfield_for_manytomany(db_field, request, **kwargs)
-        return form_field
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        form_field = super().formfield_for_foreignkey(db_field, request, **kwargs)
-        return form_field
-
 
 @admin.register(IngredientInRecipe)
 class IngredientInRecipeAdmin(admin.ModelAdmin):

@@ -2,7 +2,6 @@ import pytest
 from django.db import models
 from rest_framework import status
 
-
 from tests.utils import check_model_field_names
 
 try:
