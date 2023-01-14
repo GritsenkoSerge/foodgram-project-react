@@ -226,8 +226,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @staticmethod
     def delete_related_object(request, pk, model, error):
         recipe = get_object_or_404(Recipe, id=pk)
-        if not model.objects.filter(recipe=recipe, user=request.user).exists():
-            return Response({"errors": error}, status.HTTP_400_BAD_REQUEST)
+        get_object_or_404(model, recipe=recipe, user=request.user)
         model.objects.get(recipe=recipe, user=request.user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

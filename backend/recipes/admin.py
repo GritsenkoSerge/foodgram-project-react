@@ -12,18 +12,24 @@ from .models import (
 
 class IngredientInRecipeInline(admin.TabularInline):
     model = IngredientInRecipe
+    extra = 0
+    min_num = 1
 
 
 class FavoriteRecipeInline(admin.TabularInline):
     model = FavoriteRecipe
+    extra = 0
 
 
 class TagRecipeInline(admin.TabularInline):
     model = TagRecipe
+    extra = 0
+    min_num = 1
 
 
 class ShoppingCartRecipeInline(admin.TabularInline):
     model = ShoppingCartRecipe
+    extra = 0
 
 
 @admin.register(Recipe)

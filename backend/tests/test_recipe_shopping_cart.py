@@ -111,13 +111,13 @@ class TestShoppingCartRecipe:
             "Убедитесь, что перед запросом `{url}`, рецепт не находится в корзине."
         )
         response = api_client.delete(url)
-        code_expected = status.HTTP_400_BAD_REQUEST
+        code_expected = status.HTTP_404_NOT_FOUND
         assert (
             response.status_code == code_expected
         ), f"Убедитесь, что при запросе `{url}`, возвращается код {code_expected}."
         json = response.json()
         assert json.get(
-            "errors"
+            "detail"
         ), f"Убедитесь, что при запросе `{url}`, возвращается текст ошибки."
 
     # delete /api/recipes/{id}/shopping_cart/ 401

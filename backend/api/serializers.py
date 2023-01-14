@@ -80,7 +80,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         author = self.initial_data.get("author")
         if user == author:
             raise serializers.ValidationError("Нельзя подписаться на самого себя!")
-        if Subscription.objects.filter(user=user, author=author).exists():
+        if author.subscriptions.filter(user=user).exists():
             raise serializers.ValidationError(
                 "Нельзя подписаться дважды на одного пользователя!"
             )
