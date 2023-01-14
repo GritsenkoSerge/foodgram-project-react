@@ -81,7 +81,7 @@ DATABASES = {
     },
 }
 DATABASES["default"] = DATABASES[
-    "sqlite3" if os.getenv("USE_SQLITE", "False") == "True" else "postgres"
+    "sqlite3" if os.getenv("USE_SQLITE", "True") == "True" else "postgres"
 ]
 
 AUTH_PASSWORD_VALIDATORS = [
