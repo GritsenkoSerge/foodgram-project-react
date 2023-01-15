@@ -6,7 +6,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata_value:/var/lib/postgresql/data
+      - postgres_value:/var/lib/postgresql/data
     env_file:
       - ./.env
   frontend:
@@ -52,6 +52,6 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
-  pgdata_value:
+  postgres_value:
   static_value:
   media_value:
