@@ -27,6 +27,7 @@ services:
       - db
     env_file:
       - ./.env
+    command: "/bin/sh -c 'cd app; python3 manage.py migrate; python3 manage.py collectstatic'"
   nginx:
     image: nginx:1.21.3-alpine
     ports:
