@@ -155,9 +155,10 @@ class TestShoppingCartRecipe:
         #     "application/pdf",
         #     "text/plain",
         # )
-        # assert (
-        #     response.get("Content-Type") in schemas
-        # ), f"Убедитесь, что при запросе `{url}`, в заголовке ответа из схем {schemas}."
+        # assert response.get("Content-Type") in schemas, (
+        #     f"Убедитесь, что при запросе `{url}`, "
+        #     f"в заголовке ответа из схем {schemas}."
+        # )
         # assert (
         #     response.content
         # ), f"Убедитесь, что при запросе `{url}`, в ответе есть content."
