@@ -19,7 +19,7 @@ class Command(BaseCommand):
         if verbosity > 0:
             self.stdout.write("Загрузка тестовых данных...")
         for model, file_name in TABLES:
-            file_path = f"../data/{file_name}"
+            file_path = f"./data/{file_name}"
             try:
                 with open(file_path, "rt", encoding="utf-8") as json_file:
                     json_data = json.load(json_file)
