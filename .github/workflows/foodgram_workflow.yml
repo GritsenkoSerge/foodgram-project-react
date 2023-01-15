@@ -74,6 +74,7 @@ jobs:
             echo DEBUG=${{ secrets.DEBUG }} >> .env
             echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> .env
             echo USE_SQLITE=${{ secrets.USE_SQLITE }} >> .env
+            sudo docker image rm ${{ secrets.DOCKER_USERNAME }}/foodgram
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram
             sudo docker-compose up -d
 
