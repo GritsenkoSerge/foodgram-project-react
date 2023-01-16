@@ -9,14 +9,14 @@ from .models import Subscription, User
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     @admin.display(description="Количество подписчиков")
-    def subscription_amount(self):
+    def subscription_amount(self, user):
         """Количество подписчиков для вывода в админке."""
-        return self.subscriptions.count()
+        return user.subscriptions.count()
 
     @admin.display(description="Количество рецептов")
-    def recipe_amount(self):
+    def recipe_amount(self, user):
         """Количество рецептов для вывода в админке."""
-        return self.recipes.count()
+        return user.recipes.count()
 
     list_display = (
         "email",
@@ -25,6 +25,8 @@ class UserAdmin(BaseUserAdmin):
         "last_name",
         "is_staff",
         "is_superuser",
+        "subscription_amount",
+        "recipe_amount",
     )
     list_filter = (
         "is_superuser",
@@ -68,10 +70,6 @@ class UserAdmin(BaseUserAdmin):
     )
     ordering = ("email",)
     filter_horizontal = ()
-    readonly_fields = (
-        subscription_amount,
-        recipe_amount,
-    )
     empty_value_display = settings.ADMIN_MODEL_EMPTY_VALUE
 
 

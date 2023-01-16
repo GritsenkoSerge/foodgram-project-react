@@ -36,7 +36,7 @@ class ShoppingCartRecipeInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    @admin.display(description="Число добавлений в избранное")
+    @admin.display(description="Количество добавлений в избранное")
     def favorite_amount(self):
         """Число добавлений рецепта в избранное для вывода в админке."""
         return FavoriteRecipe.objects.filter(recipe=self.id).count()
@@ -51,6 +51,7 @@ class RecipeAdmin(admin.ModelAdmin):
         "name",
         "author",
         ingredients_in_recipe,
+        favorite_amount,
     )
     search_fields = (
         "author",

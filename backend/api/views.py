@@ -226,10 +226,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @staticmethod
-    def delete_related_object(request, pk, model, error):
-        recipe = get_object_or_404(Recipe, id=pk)
-        get_object_or_404(model, recipe=recipe, user=request.user)
-        model.objects.get(recipe=recipe, user=request.user).delete()
+    def delete_related_object(request, pk, model):
+        get_object_or_404(model, recipe_id=pk, user=request.user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=["post"], detail=True)
@@ -244,9 +242,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk):
-        return RecipeViewSet.delete_related_object(
-            request, pk, FavoriteRecipe, "Рецепта нет в избранном."
-        )
+        return RecipeViewSet.delete_related_object(request, pk, FavoriteRecipe)
 
     @action(methods=["post"], detail=True)
     def shopping_cart(self, request, pk):
@@ -260,6 +256,4 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk):
-        return RecipeViewSet.delete_related_object(
-            request, pk, ShoppingCartRecipe, "Рецепта нет в корзине."
-        )
+        return RecipeViewSet.delete_related_object(request, pk, ShoppingCartRecipe)
