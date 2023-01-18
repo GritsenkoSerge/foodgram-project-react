@@ -29,8 +29,8 @@ services:
   nginx:
     image: nginx:1.21.3-alpine
     ports:
-      - "1380:1380"
-      - "13443:13443"
+      - "1380:80"
+      - "13443:443"
     volumes:
       - ./nginx/foodgram.conf:/etc/nginx/conf.d/foodgram.conf
       - ./frontend/build:/usr/share/nginx/html/

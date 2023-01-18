@@ -156,7 +156,8 @@ def recipe(mixer, user, tag, lunch_tag):
 
 
 @pytest.fixture
-def recipe_ingredient(mixer, recipe, few_ingredients):
+def recipe_ingredient(mixer, recipe, ingredient, few_ingredients):
+    mixer.blend(IngredientInRecipe, recipe=recipe, ingredient=ingredient, amount=7)
     return mixer.blend(
         IngredientInRecipe, recipe=recipe, ingredient=few_ingredients, amount=2
     )

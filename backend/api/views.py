@@ -202,15 +202,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         queryset = (
             IngredientInRecipe.objects.filter(
-                recipe__in=ShoppingCartRecipe.objects.filter(user=request.user).values(
-                    "recipe__id"
-                )
+                recipe__shoppingcartrecipe__user=request.user
             )
             .values("ingredient__name", "ingredient__measurement_unit")
             .annotate(Sum("amount"))
             .order_by("ingredient__name")
         )
-
         return RecipeViewSet.generate_shopping_cart_pdf(queryset, request.user)
 
     @staticmethod
