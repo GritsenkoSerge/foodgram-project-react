@@ -1,3 +1,4 @@
+from django.db import transaction
 from djoser import serializers as djoser_serializers
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers as serializers
@@ -179,6 +180,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             ]
         )
 
+    @transaction.atomic
     def create(self, validated_data):
         request = self.context["request"]
         ingredientinrecipe_set = validated_data.pop("ingredientinrecipe_set")
@@ -188,6 +190,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.tags.set(tags)
         return instance
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         if "ingredientinrecipe_set" in validated_data:
             ingredientinrecipe_set = validated_data.pop("ingredientinrecipe_set")

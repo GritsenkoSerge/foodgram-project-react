@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.10-alpine
 RUN apt-get update; apt-get install wkhtmltopdf -y
 RUN python3 -m pip install --upgrade pip
 WORKDIR /app
