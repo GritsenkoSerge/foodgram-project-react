@@ -1,7 +1,7 @@
 # Проект «Продуктовый помощник» [![Yamdb workflow](https://github.com/GritsenkoSerge/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)](https://github.com/GritsenkoSerge/foodgram-project-react/actions/workflows/foodgram_workflow.yml)
 ### Сайт [Foodgram](https://foodgram.gricen.ru/), «Продуктовый помощник». Онлайн-сервис и API для него. На этом сервисе пользователи смогут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
 
-## Использованные технологии/пакеты
+## Использованные технологии/пакеты:
 * Django 3.2.16
 * djangorestframework 3.14.0
 * djoser 2.1.0
